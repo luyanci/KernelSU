@@ -1,5 +1,5 @@
 version: "1"
 rules:
-  - base: master
-    upstream: tiann:master
+  - base: main
+    upstream: tiann:main
     mergeMethod: merge
