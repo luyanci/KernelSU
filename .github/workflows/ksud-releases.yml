@@ -15,5 +15,5 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2.0.4
         with:
-            tag-name: 'release'
+            tag_name: 'ksud-release'
             files: ./**/ksud*
