@@ -4,10 +4,35 @@ on:
  workflow_dispatch:
  
 jobs:
-  Build:
-    uses: ./.github/workflows/build-manager.yml
+  build-lkm:
+    uses: ./.github/workflows/build-lkm.yml
+    secrets: inherit
+
+  build-ksud:
+    needs: build-lkm
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-linux-android
+            os: ubuntu-latest
+          - target: x86_64-linux-android
+            os: ubuntu-latest
+          - target: x86_64-pc-windows-gnu # windows pc
+            os: ubuntu-latest
+          - target: x86_64-apple-darwin # Intel mac
+            os: macos-latest
+          - target: aarch64-apple-darwin # M chip mac
+            os: macos-latest
+          - target: aarch64-unknown-linux-musl # arm64 Linux
+            os: ubuntu-latest
+          - target: x86_64-unknown-linux-musl # x86 Linux
+            os: ubuntu-latest
+    uses: ./.github/workflows/ksud.yml
+    with:
+      target: ${{ matrix.target }}
+      os: ${{ matrix.os }}  
   release:
-    needs: Build
+    needs: build-ksud
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifact
