@@ -5,7 +5,7 @@ on:
  
 jobs:
   Build:
-    uses: ./.github/workflows/manager.yml
+    uses: ./.github/workflows/build-manager.yml
   release:
     needs: Build
     runs-on: ubuntu-latest
