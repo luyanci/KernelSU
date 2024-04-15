@@ -54,7 +54,7 @@ jobs:
     steps:
       - name: Get Current Time
         run: |
-          TIME=$(date +"%Y-%m-%d-%H.%M")
+          TIME=$(date +"%Y-%m-%d")
           echo "TIME=$TIME" >> $GITHUB_ENV
       - name: Download Artifact
         uses: actions/download-artifact@v4.1.4
@@ -66,5 +66,5 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2.0.4
         with:
-            tag_name: 'ksud-${{ env.TIME }}'
+            tag_name: 'ksud-${{ env.TIME }}-${{ github.run_number }}-'
             files: ./**/ksud-*.zip
