@@ -52,6 +52,10 @@ jobs:
             os: ubuntu-latest
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Get Current Time
+        run: |
+          TIME=$(date +"%Y-%m-%d-%H.%M")
+          echo "TIME=$TIME" >> $GITHUB_ENV
       - name: Download Artifact
         uses: actions/download-artifact@v4.1.4
         with:
@@ -63,5 +67,5 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2.0.4
         with:
-            tag_name: 'ksud-release'
+            tag_name: 'ksud-${{ env.TIME }}'
             files: ./**/ksud-*.zip
