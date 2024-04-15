@@ -54,7 +54,7 @@ jobs:
     steps:
       - name: Get Current Time
         run: |
-          TIME=$(date +"%Y-%m-%d")
+          TIME=$(date +"%Y%m%d")
           echo "TIME=$TIME" >> $GITHUB_ENV
       - name: Download Artifact
         uses: actions/download-artifact@v4.1.4
