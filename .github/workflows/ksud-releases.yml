@@ -62,7 +62,7 @@ jobs:
             name: ksud-${{ matrix.target }}
       - name: Package (${{ matrix.target }})
         run: |
-         7z a -tzip ksud-${{ matrix.target }}.zip ./ksud-${{ matrix.target }}/release
+         7z a -tzip ksud-${{ matrix.target }}.zip ./${{ matrix.target }}/release
       - name: Create Release
         uses: softprops/action-gh-release@v2.0.4
         with:
