@@ -3,7 +3,11 @@ name: Release ksud
 on:
  workflow_dispatch:
  push:
-   paths: ["./userspace/ksud/src/**/**","./.github/workflows/ksud-releases.yml"]
+    branches:
+      - main # default branch
+    paths:
+      - userspace/ksud/src/**/**
+      - .github/workflows/ksud-releases.yml
 
 jobs:
   build-lkm:
