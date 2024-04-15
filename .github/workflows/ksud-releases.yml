@@ -2,7 +2,9 @@ name: Release ksud
 
 on:
  workflow_dispatch:
- 
+ push:
+   paths:["./userspace/ksud/**/**","./.github/workflows/ksud-releases.yml"]
+
 jobs:
   build-lkm:
     uses: ./.github/workflows/build-lkm.yml
