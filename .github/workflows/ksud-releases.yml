@@ -59,7 +59,7 @@ jobs:
       - name: Package (${{ matrix.target }})
         run: |
          cd electron-static
-         7z a -tzip ksud-${{ matrix.target }}.zip ./ksud-${{ matrix.target }}
+         7z a -tzip ksud-${{ matrix.target }}.zip ./ksud-${{ matrix.target }}/release
       - name: Create Release
         uses: softprops/action-gh-release@v2.0.4
         with:
