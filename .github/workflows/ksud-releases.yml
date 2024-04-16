@@ -6,7 +6,7 @@ on:
     branches:
       - main # default branch
     paths:
-      - userspace/ksud/src/**/**
+      - userspace/ksud/**/**
       - .github/workflows/ksud-releases.yml
 
 jobs:
