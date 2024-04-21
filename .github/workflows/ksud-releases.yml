@@ -72,5 +72,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2.0.4
         with:
-            tag_name: 'ksud-${{ env.TIME }}.${{ github.run_number }}'
+            name: 'ksud-${{ env.TIME }}.${{ github.run_number }}'
+            tag_name: 'v${{ env.TIME }}.${{ github.run_number }}'
+            token: ${{ secret.GIT_TOKEN }}
+            body: 'ksud-build-UNOFFICAL-${{ env.TIME }}.${{ github.run_number }}'
             files: ./**/ksud-*.zip
