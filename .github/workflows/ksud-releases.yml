@@ -74,6 +74,5 @@ jobs:
         with:
             name: 'ksud-${{ env.TIME }}.${{ github.run_number }}'
             tag_name: 'v${{ env.TIME }}.${{ github.run_number }}'
-            token: ${{ secrets.GIT_TOKEN }}
             body: 'ksud-build-UNOFFICAL-${{ env.TIME }}.${{ github.run_number }}'
             files: ./**/ksud-*.zip
