@@ -47,9 +47,10 @@ import me.weishu.kernelsu.ui.component.KeyEventBlocker
 import me.weishu.kernelsu.ui.util.LkmSelection
 import me.weishu.kernelsu.ui.util.LocalSnackbarHost
 import me.weishu.kernelsu.ui.util.installBoot
-import me.weishu.kernelsu.ui.util.installModule
+import me.weishu.kernelsu.ui.util.flashModule
 import me.weishu.kernelsu.ui.util.reboot
 import me.weishu.kernelsu.ui.util.restoreBoot
+import me.weishu.kernelsu.ui.util.uninstallPermanently
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -174,6 +175,8 @@ sealed class FlashIt : Parcelable {
     data class FlashModule(val uri: Uri) : FlashIt()
 
     data object FlashRestore : FlashIt()
+
+    data object FlashUninstall : FlashIt()
 }
 
 fun flashIt(
@@ -191,9 +194,11 @@ fun flashIt(
             onStderr
         )
 
-        is FlashIt.FlashModule -> installModule(flashIt.uri, onFinish, onStdout, onStderr)
+        is FlashIt.FlashModule -> flashModule(flashIt.uri, onFinish, onStdout, onStderr)
 
         FlashIt.FlashRestore -> restoreBoot(onFinish, onStdout, onStderr)
+
+        FlashIt.FlashUninstall -> uninstallPermanently(onFinish, onStdout, onStderr)
     }
 }
 

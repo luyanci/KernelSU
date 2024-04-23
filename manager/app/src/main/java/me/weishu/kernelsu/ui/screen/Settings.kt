@@ -213,7 +213,8 @@ fun SettingScreen(navigator: DestinationsNavigator) {
                 }
             )
 
-            val lkmMode = Natives.version >= Natives.MINIMAL_SUPPORTED_KERNEL_LKM && Natives.isLkmMode
+            val lkmMode =
+                Natives.version >= Natives.MINIMAL_SUPPORTED_KERNEL_LKM && Natives.isLkmMode
             if (lkmMode) {
                 UninstallItem(navigator) {
                     loadingDialog.withLoading(it)
@@ -258,10 +259,14 @@ fun UninstallItem(
                 withLoading {
                     when (uninstallType) {
                         UninstallType.TEMPORARY -> showTodo()
-                        UninstallType.PERMANENT -> showTodo()
+                        UninstallType.PERMANENT -> navigator.navigate(
+                            FlashScreenDestination(FlashIt.FlashUninstall)
+                        )
+
                         UninstallType.RESTORE_STOCK_IMAGE -> navigator.navigate(
                             FlashScreenDestination(FlashIt.FlashRestore)
                         )
+
                         UninstallType.NONE -> Unit
                     }
                 }
@@ -307,7 +312,7 @@ enum class UninstallType(val title: Int, val message: Int, val icon: ImageVector
 fun rememberUninstallDialog(onSelected: (UninstallType) -> Unit): DialogHandle {
     return rememberCustomDialog { dismiss ->
         val options = listOf(
-            UninstallType.TEMPORARY,
+            // UninstallType.TEMPORARY,
             UninstallType.PERMANENT,
             UninstallType.RESTORE_STOCK_IMAGE
         )
