@@ -82,9 +82,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - target: aarch64-unknown-linux-musl # arm64 Linux
+          - target: aarch64
             os: ubuntu-latest
-          - target: x86_64-unknown-linux-musl # x86 Linux
+          - target: x86_64
             os: ubuntu-latest
     env:
        target: ${{ matrix.target }}-unknown-linux-musl
