@@ -105,7 +105,7 @@ jobs:
       - name: copy
         run: |
           mkdir -p usr/local/bin
-          cp ${{ env.target }}/release/ksud usr/local/bin
+          cp ${{ env.target }}/release/ksud usr/local/bin/
       - name: clean
         run: |
           rm -rf ${{ env.target }}
