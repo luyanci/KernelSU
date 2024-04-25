@@ -38,7 +38,7 @@ jobs:
       target: ${{ matrix.target }}
       os: ${{ matrix.os }}  
   release:
-    needs: build-ksud
+    needs: [build-ksud,build-ksud-deb]
     strategy:
       matrix:
         include:
@@ -76,8 +76,8 @@ jobs:
             name: 'ksud-${{ env.TIME }}.${{ github.run_number }}'
             tag_name: 'v${{ env.TIME }}.${{ github.run_number }}'
             body: 'ksud-build-UNOFFICAL-${{ env.TIME }}.${{ github.run_number }}'
-            files: ./**/ksud-*.zip
-  build-release-deb:
+            files: ./**/ksud-*.*
+  build-ksud-deb:
     needs: build-ksud
     strategy:
       matrix:
