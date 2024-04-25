@@ -86,11 +86,14 @@ jobs:
             os: ubuntu-latest
           - target: x86_64-unknown-linux-musl # x86 Linux
             os: ubuntu-latest
+    env:
+       target: ${{ matrix.target }}-unknown-linux-musl
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: 'vc-teahouse/ksud-amd64'
+          repository: 'vc-teahouse/ksud-amd64-debian-base'
+          ref: ${{ matrix.target }}
       - name: Get Current Time
         run: |
           TIME=$(date +"%Y%m%d")
@@ -98,7 +101,16 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v4.1.4
         with:
-            name: ksud-${{ matrix.target }}
+            name: ksud-${{ env.target }}
       - name: copy
         run: |
-          cp ${{ matrix.target }}/release/ksud
+          mkdir -p usr/local/bin
+          cp ${{ env.target }}/release/ksud usr/local/bin
+      - name: clean
+        run: |
+          rm -rf ${{ env.target }}
+          rm README.md
+      - name: pack it!
+        run: |
+          cd ..
+          dpkg-deb --build --root-owner-group ksud-amd64-debian-base
