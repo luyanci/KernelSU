@@ -38,6 +38,7 @@ jobs:
       target: ${{ matrix.target }}
       os: ${{ matrix.os }}  
   release:
+    if: false #debug
     needs: build-ksud
     strategy:
       matrix:
