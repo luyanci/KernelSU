@@ -38,7 +38,6 @@ jobs:
       target: ${{ matrix.target }}
       os: ${{ matrix.os }}  
   release:
-    if: false #debug
     needs: build-ksud
     strategy:
       matrix:
@@ -115,3 +114,8 @@ jobs:
         run: |
           dpkg-deb --build --root-owner-group .
           mv ..deb ksud-${{ env.target }}.deb
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ksud-${{ env.target }}-deb
+          path: ./ksud-${{ env.target }}.deb
