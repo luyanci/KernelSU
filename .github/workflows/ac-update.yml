@@ -10,8 +10,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4.1.1
+        with:
+          token: ${{ secrets.GIT_TOKEN }}
       - name: Run GitHub Actions Version Updater
         uses: saadmk11/github-actions-version-updater@v0.8.1
         with:
           token: ${{ secrets.GIT_TOKEN }}
-          ignore: 'dtolnay/rust-toolchain@stable'
+          ignore: 'dtolnay/rust-toolchain@nightly',''
+
+
