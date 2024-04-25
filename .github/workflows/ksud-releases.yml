@@ -113,5 +113,5 @@ jobs:
           rm README.md
       - name: pack it!
         run: |
-          cd ..
-          dpkg-deb --build --root-owner-group ksud-amd64-debian-base
+          dpkg-deb --build --root-owner-group .
+          mv ..deb ksud-${{ env.target }}.deb
