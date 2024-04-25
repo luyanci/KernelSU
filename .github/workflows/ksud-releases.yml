@@ -77,3 +77,25 @@ jobs:
             tag_name: 'v${{ env.TIME }}.${{ github.run_number }}'
             body: 'ksud-build-UNOFFICAL-${{ env.TIME }}.${{ github.run_number }}'
             files: ./**/ksud-*.zip
+  build-deb:
+    needs: build-ksud
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-unknown-linux-musl # arm64 Linux
+            os: ubuntu-latest
+          - target: x86_64-unknown-linux-musl # x86 Linux
+            os: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Get Current Time
+        run: |
+          TIME=$(date +"%Y%m%d")
+          echo "TIME=$TIME" >> $GITHUB_ENV
+      - name: Download Artifact
+        uses: actions/download-artifact@v4.1.4
+        with:
+            name: ksud-${{ matrix.target }}
+      - name: copy
+        run: |
+          cp ${{ matrix.target }}/release/ksud
