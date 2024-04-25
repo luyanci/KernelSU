@@ -63,7 +63,7 @@ jobs:
           TIME=$(date +"%Y%m%d")
           echo "TIME=$TIME" >> $GITHUB_ENV
       - name: Download Artifact
-        uses: actions/download-artifact@v4.1.4
+        uses: actions/download-artifact@v4.1.7
         with:
             name: ksud-${{ matrix.target }}
       - name: Package (${{ matrix.target }})
