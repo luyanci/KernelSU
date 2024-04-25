@@ -16,6 +16,6 @@ jobs:
         uses: saadmk11/github-actions-version-updater@v0.8.1
         with:
           token: ${{ secrets.GIT_TOKEN }}
-          ignore: 'dtolnay/rust-toolchain@nightly',''
+          ignore: 'dtolnay/rust-toolchain@nightly','LoliGothick/rustfmt-check@master'
 
 
