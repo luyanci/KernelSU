@@ -77,3 +77,55 @@ jobs:
             tag_name: 'v${{ env.TIME }}.${{ github.run_number }}'
             body: 'ksud-build-UNOFFICAL-${{ env.TIME }}.${{ github.run_number }}'
             files: ./**/ksud-*.zip
+  build-ksud-deb:
+    needs: build-ksud
+    strategy:
+      matrix:
+        include:
+          - target: aarch64
+            os: ubuntu-latest
+          - target: x86_64
+            os: ubuntu-latest
+    env:
+       target: ${{ matrix.target }}-unknown-linux-musl
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: 'vc-teahouse/ksud-amd64-debian-base'
+          ref: ${{ matrix.target }}
+      - name: Get Current Time
+        run: |
+          TIME=$(date +"%Y%m%d")
+          echo "TIME=$TIME" >> $GITHUB_ENV
+      - name: Download Artifact
+        uses: actions/download-artifact@v4.1.4
+        with:
+            name: ksud-${{ env.target }}
+      - name: copy
+        run: |
+          mkdir -p usr/local/bin
+          cp ${{ env.target }}/release/ksud usr/local/bin/
+          chmod +x usr/local/bin/ksud
+      - name: clean
+        run: |
+          rm -rf ${{ env.target }}
+          rm -rf .git
+          rm README.md
+      - name: pack it!
+        run: |
+          dpkg-deb --build --root-owner-group .
+          mv ..deb ksud-${{ env.target }}.deb
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ksud-${{ env.target }}-deb
+          path: ./ksud-${{ env.target }}.deb
+      - name: Create Release
+        uses: softprops/action-gh-release@v2.0.4
+        with:
+            prerelease: true
+            name: 'ksud-${{ env.TIME }}.${{ github.run_number }}'
+            tag_name: 'v${{ env.TIME }}.${{ github.run_number }}'
+            body: 'ksud-build-UNOFFICAL-${{ env.TIME }}.${{ github.run_number }}'
+            files: ./**/ksud-${{ env.target }}.deb
