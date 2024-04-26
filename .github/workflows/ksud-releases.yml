@@ -106,9 +106,11 @@ jobs:
         run: |
           mkdir -p usr/local/bin
           cp ${{ env.target }}/release/ksud usr/local/bin/
+          chmod +x usr/local/bin/ksud
       - name: clean
         run: |
           rm -rf ${{ env.target }}
+          rm -rf .git
           rm README.md
       - name: pack it!
         run: |
