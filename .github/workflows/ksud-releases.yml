@@ -38,7 +38,7 @@ jobs:
       target: ${{ matrix.target }}
       os: ${{ matrix.os }}  
   release:
-    needs: [build-ksud,build-ksud-deb]
+    needs: build-ksud
     strategy:
       matrix:
         include:
@@ -76,7 +76,7 @@ jobs:
             name: 'ksud-${{ env.TIME }}.${{ github.run_number }}'
             tag_name: 'v${{ env.TIME }}.${{ github.run_number }}'
             body: 'ksud-build-UNOFFICAL-${{ env.TIME }}.${{ github.run_number }}'
-            files: ./**/ksud-*.*
+            files: ./**/ksud-*.zip
   build-ksud-deb:
     needs: build-ksud
     strategy:
@@ -121,3 +121,11 @@ jobs:
         with:
           name: ksud-${{ env.target }}-deb
           path: ./ksud-${{ env.target }}.deb
+      - name: Create Release
+        uses: softprops/action-gh-release@v2.0.4
+        with:
+            prerelease: true
+            name: 'ksud-${{ env.TIME }}.${{ github.run_number }}'
+            tag_name: 'v${{ env.TIME }}.${{ github.run_number }}'
+            body: 'ksud-build-UNOFFICAL-${{ env.TIME }}.${{ github.run_number }}'
+            files: ./**/ksud-${{ env.target }}.deb
