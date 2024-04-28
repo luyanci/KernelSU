@@ -94,6 +94,10 @@ jobs:
         with:
           repository: 'vc-teahouse/ksud-amd64-debian-base'
           ref: ${{ matrix.target }}
+      - name: Install alien
+        run: |
+          sudo apt update
+          sudo apt-get install alien
       - name: Get Current Time
         run: |
           TIME=$(date +"%Y%m%d")
@@ -107,7 +111,7 @@ jobs:
           mkdir -p usr/local/bin
           cp ${{ env.target }}/release/ksud usr/local/bin/
           chmod +x usr/local/bin/ksud
-      - name: clean
+      - name: Clean work dir
         run: |
           rm -rf ${{ env.target }}
           rm -rf .git
@@ -116,11 +120,14 @@ jobs:
         run: |
           dpkg-deb --build --root-owner-group .
           mv ..deb ksud-${{ env.target }}.deb
+      - name: Run deb2rpm
+        run: |
+          sudo alien -r --scripts ksud-${{ env.target }}.deb
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ksud-${{ env.target }}-deb
-          path: ./ksud-${{ env.target }}.deb
+          name: ksud-${{ env.target }}-packed
+          path: ./ksud-*.*
       - name: Create Release
         uses: softprops/action-gh-release@v2.0.4
         with:
@@ -128,4 +135,4 @@ jobs:
             name: 'ksud-${{ env.TIME }}.${{ github.run_number }}'
             tag_name: 'v${{ env.TIME }}.${{ github.run_number }}'
             body: 'ksud-build-UNOFFICAL-${{ env.TIME }}.${{ github.run_number }}'
-            files: ./**/ksud-${{ env.target }}.deb
+            files: ./**/ksud-*.*
