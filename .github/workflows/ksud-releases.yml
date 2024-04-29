@@ -90,7 +90,7 @@ jobs:
        target: ${{ matrix.target }}-unknown-linux-musl
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.1.4
         with:
           repository: 'vc-teahouse/ksud-amd64-debian-base'
           ref: ${{ matrix.target }}
@@ -103,7 +103,7 @@ jobs:
           TIME=$(date +"%Y%m%d")
           echo "TIME=$TIME" >> $GITHUB_ENV
       - name: Download Artifact
-        uses: actions/download-artifact@v4.1.4
+        uses: actions/download-artifact@v4.1.7
         with:
             name: ksud-${{ env.target }}
       - name: copy
@@ -124,7 +124,7 @@ jobs:
         run: |
           sudo alien -r --scripts ksud-${{ env.target }}.deb
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.3.3
         with:
           name: ksud-${{ env.target }}-packed
           path: ./ksud-*.*
