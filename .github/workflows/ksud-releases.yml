@@ -40,6 +40,7 @@ jobs:
   release:
     needs: build-ksud
     strategy:
+      fail-fast: false
       matrix:
         include:
           - target: aarch64-linux-android
@@ -80,6 +81,7 @@ jobs:
   build-ksud-deb:
     needs: build-ksud
     strategy:
+.     fail-fast: false
       matrix:
         include:
           - target: aarch64
