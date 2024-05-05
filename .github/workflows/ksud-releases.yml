@@ -44,7 +44,7 @@ jobs:
       target: ${{ matrix.target }}
       os: ${{ matrix.os }}  
   release:
-    needs: build-ksud
+    needs: [build-ksud,setup]
     env: 
       TIME: '${{ needs.setup.outputs.BUILD_DATE }}'
     strategy:
@@ -88,7 +88,7 @@ jobs:
             body: 'ksud-build-UNOFFICAL-${{ env.TIME }}.${{ github.run_number }}'
             files: ./**/ksud-*.zip
   build-ksud-deb:
-    needs: build-ksud
+    needs: [build-ksud,setup]
     strategy:
       fail-fast: false
       matrix:
