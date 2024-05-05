@@ -13,7 +13,7 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     steps:
-      - name: ⏰ Set builddate
+      - name: Set builddate
         id: generate-builddate
         run: echo "BUILDDATE=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
   build-lkm:
@@ -45,6 +45,8 @@ jobs:
       os: ${{ matrix.os }}  
   release:
     needs: build-ksud
+    env: 
+      TIME: '${{ needs.setup.outputs.BUILD_DATE }}'
     strategy:
       fail-fast: false
       matrix:
@@ -96,6 +98,7 @@ jobs:
             os: ubuntu-latest
     env:
        target: ${{ matrix.target }}-unknown-linux-musl
+       TIME: '${{ needs.setup.outputs.BUILD_DATE }}'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4.1.4
