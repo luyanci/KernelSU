@@ -10,6 +10,12 @@ on:
       - .github/workflows/ksud-releases.yml
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⏰ Set builddate
+        id: generate-builddate
+        run: echo "BUILDDATE=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
   build-lkm:
     uses: ./.github/workflows/build-lkm.yml
     secrets: inherit
