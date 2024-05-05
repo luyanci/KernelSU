@@ -68,6 +68,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Get Current Time
+        if: false
         run: |
           TIME=$(date +"%Y%m%d")
           echo "TIME=$TIME" >> $GITHUB_ENV
@@ -110,6 +111,7 @@ jobs:
           sudo apt update
           sudo apt-get install alien
       - name: Get Current Time
+        if: false
         run: |
           TIME=$(date +"%Y%m%d")
           echo "TIME=$TIME" >> $GITHUB_ENV
