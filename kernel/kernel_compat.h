@@ -21,7 +21,6 @@ static inline const struct cred *get_cred_rcu(const struct cred *cred)
 #endif		
 		return NULL;
 	validate_creds(cred);
-	nonconst_cred->non_rcu = 0;
 	return cred;
 }
 #endif
