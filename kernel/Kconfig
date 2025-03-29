@@ -15,6 +15,13 @@ config KSU_DEBUG
 	help
 	  Enable KernelSU debug mode.
 
+config KPM
+	bool "Enable KernelSU KPM"
+	default n
+	help
+	  This option enables the KernelSU KPM feature. If enabled, it will
+	  override the kernel version check and enable the hook functionality.
+
 config KSU_ALLOWLIST_WORKAROUND
     bool "KernelSU Session init keyring workaround"
     depends on KSU

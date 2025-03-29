@@ -14,6 +14,8 @@ kernelsu-objs += selinux/rules.o
 ccflags-y += -I$(srctree)/security/selinux -I$(srctree)/security/selinux/include
 ccflags-y += -I$(objtree)/security/selinux -include $(srctree)/include/uapi/asm-generic/errno.h
 
+obj-$(CONFIG_KPM) += kpm/
+
 # Determine the appropriate atomic function and apply patch accordingly
 ifeq ($(shell grep -q "atomic_inc_not_zero" $(srctree)/kernel/cred.c; echo $$?),0)
 ATOMIC_INC_FUNC = atomic_inc_not_zero
