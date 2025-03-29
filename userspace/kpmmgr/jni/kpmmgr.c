@@ -20,7 +20,7 @@
 #define SUKISU_KPM_CONTROL 6
 #define SUKISU_KPM_PRINT 7
 
-#define CONTROL_CODE(n) (CMD_KPM_CONTROL + n)
+#define CONTROL_CODE(n) (CMD_KPM_CONTROL + n - 1)
 
 void print_usage(const char *prog) {
     printf("Usage: %s <command> [args]\n", prog);
@@ -41,17 +41,19 @@ int main(int argc, char *argv[]) {
     }
 
     int ret = -1;
-    int out = 0;  // 存储返回值
+    int out = -1;  // 存储返回值
 
     if (strcmp(argv[1], "load") == 0 && argc >= 3) {
         // 加载 KPM 模块
         ret = prctl(KSU_OPTIONS, CONTROL_CODE(SUKISU_KPM_LOAD), argv[2], (argc > 3 ? argv[3] : NULL), &out);
     } else if (strcmp(argv[1], "unload") == 0 && argc >= 3) {
         // 卸载 KPM 模块
-        ret = prctl(KSU_OPTIONS, CONTROL_CODE(SUKISU_KPM_UNLOAD), argv[2], &out);
+        ret = prctl(KSU_OPTIONS, CONTROL_CODE(SUKISU_KPM_UNLOAD), argv[2], NULL, &out);
     } else if (strcmp(argv[1], "num") == 0) {
         // 获取加载的 KPM 数量
-        ret = prctl(KSU_OPTIONS, CONTROL_CODE(SUKISU_KPM_NUM), &out);
+        ret = prctl(KSU_OPTIONS, CONTROL_CODE(SUKISU_KPM_NUM), NULL, NULL, &out);
+        printf("%d", out);
+        return 0;
     } else if (strcmp(argv[1], "list") == 0) {
         // 获取模块列表
         char buffer[1024] = {0};
@@ -71,14 +73,14 @@ int main(int argc, char *argv[]) {
         ret = prctl(KSU_OPTIONS, CONTROL_CODE(SUKISU_KPM_CONTROL), argv[2], argv[3], &out);
     } else if (strcmp(argv[1], "print") == 0) {
         // 在 stdout 输出 KPM 列表
-        ret = prctl(KSU_OPTIONS, CONTROL_CODE(SUKISU_KPM_PRINT), &out);
+        ret = prctl(KSU_OPTIONS, CONTROL_CODE(SUKISU_KPM_PRINT), NULL, NULL, &out);
     } else {
         print_usage(argv[0]);
         return 1;
     }
 
-    if (ret < 0) {
-        printf("Error: %s\n", strerror(errno));
+    if (out < 0) {
+        printf("Error: %s\n", strerror(-out));
         return -1;
     }
 
