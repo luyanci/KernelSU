@@ -5,6 +5,7 @@
 #include <string.h>
 #include <errno.h>
 
+#define KERNEL_SU_OPTION 0xDEADBEEF
 #define KSU_OPTIONS 0xdeadbeef
 
 // KPM控制代码
