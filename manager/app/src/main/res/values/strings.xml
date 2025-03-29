@@ -142,4 +142,20 @@
     <string name="log_saved">Logs saved</string>
     <string name="settings_disable_su">Disable su compatibility</string>
     <string name="settings_disable_su_summary">Temporarily disable any applications from obtaining root privileges via the ⁠su command (existing root processes will not be affected).</string>
+    <string name="kpm">kpm module</string>
+    <string name="kpm_title">kernel module</string>
+    <string name="kpm_empty">No installed kernel modules at this time</string>
+    <string name="kpm_version">releases</string>
+    <string name="kpm_author">author</string>
+    <string name="kpm_execute">fulfillment</string>
+    <string name="kpm_uninstall">uninstallation</string>
+    <string name="kpm_uninstall_confirm">Determine the kernel module to uninstall: %1$s ？</string>
+    <string name="kpm_uninstall_success">Uninstalled successfully</string>
+    <string name="kpm_uninstall_failed">Failed to uninstall</string>
+    <string name="kpm_install">Installing the kpm module</string>
+    <string name="kpm_install_confirm">Confirm installation?</string>
+    <string name="kpm_install_success">Installation of kpm module successful</string>
+    <string name="kpm_install_failed">Installation of kpm module failed</string>
+    <string name="kpm_args">kpm arguments</string>
+    <string name="kpm_control">kpm control</string>
 </resources>
