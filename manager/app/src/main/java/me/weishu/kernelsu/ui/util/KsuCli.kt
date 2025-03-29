@@ -434,3 +434,57 @@ fun restartApp(packageName: String) {
     forceStopApp(packageName)
     launchApp(packageName)
 }
+
+private fun getKpmmgrPath(): String {
+    return ksuApp.applicationInfo.nativeLibraryDir + File.separator + "libkpmmgr.so"
+}
+
+
+fun loadKpmModule(path: String, args: String? = null): String {
+    val shell = getRootShell()
+    val cmd = "${getKpmmgrPath()} load $path ${args ?: ""}"
+    val result = ShellUtils.fastCmd(shell, cmd)
+    return result
+}
+
+fun unloadKpmModule(name: String): String {
+    val shell = getRootShell()
+    val cmd = "${getKpmmgrPath()} unload $name"
+    val result = ShellUtils.fastCmd(shell, cmd)
+    return result
+}
+
+fun getKpmModuleCount(): String {
+    val shell = getRootShell()
+    val cmd = "${getKpmmgrPath()} num"
+    val result = ShellUtils.fastCmd(shell, cmd)
+    return result
+}
+
+fun listKpmModules(): String {
+    val shell = getRootShell()
+    val cmd = "${getKpmmgrPath()} list"
+    val result = ShellUtils.fastCmd(shell, cmd)
+    return result
+}
+
+fun getKpmModuleInfo(name: String): String {
+    val shell = getRootShell()
+    val cmd = "${getKpmmgrPath()} info $name"
+    val result = ShellUtils.fastCmd(shell, cmd)
+    return result
+}
+
+fun controlKpmModule(name: String, args: String? = null): String {
+    val shell = getRootShell()
+    val cmd = "${getKpmmgrPath()} control $name ${args ?: ""}"
+    val result = ShellUtils.fastCmd(shell, cmd)
+    return result
+}
+
+fun printKpmModules(): String {
+    val shell = getRootShell()
+    val cmd = "${getKpmmgrPath()} print"
+    val result = ShellUtils.fastCmd(shell, cmd)
+    return result
+}
