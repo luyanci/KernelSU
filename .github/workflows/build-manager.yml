@@ -39,7 +39,7 @@ jobs:
         target: ${{ matrix.target }}
         os: ${{ matrix.os }}
   build-manager:
-    needs: build-ksud
+    needs: [build-ksud,build-kpmmgr]
     runs-on: ubuntu-latest
     environment: signing
     defaults:
