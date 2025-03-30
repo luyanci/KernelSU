@@ -8,6 +8,7 @@ on:
       - 'manager/**'
       - 'kernel/**'
       - 'userspace/ksud/**'
+      - 'userspace/kpmmgr/**'
   pull_request:
     branches: [ "main" ]
     paths:
@@ -26,7 +27,17 @@ jobs:
     with:
       target: ${{ matrix.target }}
       os: ${{ matrix.os }}
-
+  build-kpmmgr:
+      if: ${{ always() }}
+      strategy:    
+          matrix:
+            include:
+              - target: aarch64-linux-android
+                os: ubuntu-latest
+      uses: ./.github/workflows/kpmmgr.yml
+      with:
+        target: ${{ matrix.target }}
+        os: ${{ matrix.os }}
   build-manager:
     needs: build-ksud
     runs-on: ubuntu-latest
@@ -81,9 +92,20 @@ jobs:
           name: ksud-aarch64-linux-android
           path: .
 
+      - name: Download arm64 kpmmgr
+        uses: actions/download-artifact@v4
+        with:
+          name: kpmmgr-aarch64-linux-android
+          path: .
+
       - name: Copy ksud to app jniLibs
         run: |
           cp -f ../aarch64-linux-android/release/ksud ../manager/app/src/main/jniLibs/arm64-v8a/libksud.so
+
+      - name: Copy kpmmgr to app jniLibs
+        run: |
+          mkdir -p app/src/main/jniLibs/arm64-v8a
+          cp -f ../arm64-v8a/kpmmgr ../manager/app/src/main/jniLibs/arm64-v8a/kpmmgr.so
 
       - name: Build with Gradle
         run: |
