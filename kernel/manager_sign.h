@@ -8,6 +8,11 @@
 #define EXPECTED_HASH_RSUNTK                                                   \
 	"f415f4ed9435427e1fdf7f1fccd4dbc07b3d6b8751e4dbcec6f19671f427870b"
 
+// luyanci/KernelSU
+#define EXPECTED_SIZE_LUYANCI   0x37d
+#define EXPECTED_HASH_LUYANCI
+	"50234c79d22d0d2a1dba0ad90d1acffbb2acdc5e80cfcb965b01572f1e538112"
+
 // 5ec1cff/KernelSU
 #define EXPECTED_SIZE_5EC1CFF 384
 #define EXPECTED_HASH_5EC1CFF                                                  \
