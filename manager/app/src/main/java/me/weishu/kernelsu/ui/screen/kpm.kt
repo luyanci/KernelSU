@@ -29,8 +29,6 @@ import me.weishu.kernelsu.ui.component.ConfirmResult
 import me.weishu.kernelsu.ui.component.SearchAppBar
 import me.weishu.kernelsu.ui.component.rememberConfirmDialog
 import me.weishu.kernelsu.ui.component.rememberLoadingDialog
-import me.weishu.kernelsu.ui.theme.getCardColors
-import me.weishu.kernelsu.ui.theme.getCardElevation
 import me.weishu.kernelsu.ui.viewmodel.KpmViewModel
 import me.weishu.kernelsu.ui.util.loadKpmModule
 import me.weishu.kernelsu.ui.util.unloadKpmModule
@@ -56,7 +54,7 @@ fun KpmScreen(
     val kpmInstallSuccess = stringResource(R.string.kpm_install_success)
     val kpmInstallFailed = stringResource(R.string.kpm_install_failed)
     val install = stringResource(R.string.install)
-    val cancel = stringResource(R.string.cancel)
+    val cancel = stringResource(android.R.string.cancel)
     val kpmUninstall = stringResource(R.string.kpm_uninstall)
     val kpmUninstallConfirmTemplate = stringResource(R.string.kpm_uninstall_confirm)
     val uninstall = stringResource(R.string.uninstall)
@@ -228,8 +226,7 @@ private fun KpmModuleItem(
     onControl: () -> Unit
 ) {
     ElevatedCard(
-        colors = getCardColors(MaterialTheme.colorScheme.secondaryContainer),
-        elevation = CardDefaults.cardElevation(defaultElevation = getCardElevation())
+        modifier = Modifier.fillMaxWidth()
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
