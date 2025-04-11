@@ -13,15 +13,38 @@
 #define CMD_KPM_CONTROL_MAX 7
 
 // 控制代码
-#define SUKISU_KPM_LOAD 1
-#define SUKISU_KPM_UNLOAD 2
-#define SUKISU_KPM_NUM 3
-#define SUKISU_KPM_LIST 4
-#define SUKISU_KPM_INFO 5
-#define SUKISU_KPM_CONTROL 6
-#define SUKISU_KPM_PRINT 7
+// prctl(xxx, 28, "PATH", "ARGS")
+// success return 0, error return -N
+#define SUKISU_KPM_LOAD 28
 
-#define CONTROL_CODE(n) (CMD_KPM_CONTROL + n - 1)
+// prctl(xxx, 29, "NAME")
+// success return 0, error return -N
+#define SUKISU_KPM_UNLOAD 29
+
+// num = prctl(xxx, 30)
+// error return -N
+// success return +num or 0
+#define SUKISU_KPM_NUM 30
+
+// prctl(xxx, 31, Buffer, BufferSize)
+// success return +out, error return -N
+#define SUKISU_KPM_LIST 31
+
+// prctl(xxx, 32, "NAME", Buffer[256])
+// success return +out, error return -N
+#define SUKISU_KPM_INFO 32
+
+// prctl(xxx, 33, "NAME", "ARGS")
+// success return KPM's result value
+// error return -N
+#define SUKISU_KPM_CONTROL 33
+
+// prctl(xxx, 34, buffer, bufferSize)
+// success return KPM's result value
+// error return -N
+#define SUKISU_KPM_VERSION 34
+
+#define CONTROL_CODE(n) (n)
 
 void print_usage(const char *prog) {
     printf("Usage: %s <command> [args]\n", prog);
@@ -32,7 +55,7 @@ void print_usage(const char *prog) {
     printf("  list                  List loaded KPM modules\n");
     printf("  info <name>           Get info of a KPM module\n");
     printf("  control <name> <args> Send control command to a KPM module\n");
-    printf("  print                 Print KPM module list to stdout\n");
+    printf("  version               Print KPM Loader version\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -47,6 +70,9 @@ int main(int argc, char *argv[]) {
     if (strcmp(argv[1], "load") == 0 && argc >= 3) {
         // 加载 KPM 模块
         ret = prctl(KSU_OPTIONS, CONTROL_CODE(SUKISU_KPM_LOAD), argv[2], (argc > 3 ? argv[3] : NULL), &out);
+        if(out > 0) {
+            printf("Success");
+        }
     } else if (strcmp(argv[1], "unload") == 0 && argc >= 3) {
         // 卸载 KPM 模块
         ret = prctl(KSU_OPTIONS, CONTROL_CODE(SUKISU_KPM_UNLOAD), argv[2], NULL, &out);
@@ -59,22 +85,25 @@ int main(int argc, char *argv[]) {
         // 获取模块列表
         char buffer[1024] = {0};
         ret = prctl(KSU_OPTIONS, CONTROL_CODE(SUKISU_KPM_LIST), buffer, sizeof(buffer), &out);
-        if (ret >= 0) {
+        if (out >= 0) {
             printf("%s", buffer);
         }
     } else if (strcmp(argv[1], "info") == 0 && argc >= 3) {
         // 获取指定模块信息
         char buffer[256] = {0};
         ret = prctl(KSU_OPTIONS, CONTROL_CODE(SUKISU_KPM_INFO), argv[2], buffer, &out);
-        if (ret >= 0) {
+        if (out >= 0) {
             printf("%s\n", buffer);
         }
     } else if (strcmp(argv[1], "control") == 0 && argc >= 4) {
         // 控制 KPM 模块
         ret = prctl(KSU_OPTIONS, CONTROL_CODE(SUKISU_KPM_CONTROL), argv[2], argv[3], &out);
-    } else if (strcmp(argv[1], "print") == 0) {
-        // 在 stdout 输出 KPM 列表
-        ret = prctl(KSU_OPTIONS, CONTROL_CODE(SUKISU_KPM_PRINT), NULL, NULL, &out);
+    } else if (strcmp(argv[1], "version") == 0) {
+         char buffer[1024] = {0};
+        ret = prctl(KSU_OPTIONS, CONTROL_CODE(SUKISU_KPM_VERSION), buffer, sizeof(buffer), &out);
+        if (out >= 0) {
+            printf("%s", buffer);
+        }
     } else {
         print_usage(argv[0]);
         return 1;

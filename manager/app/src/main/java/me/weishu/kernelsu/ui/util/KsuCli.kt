@@ -435,7 +435,7 @@ fun restartApp(packageName: String) {
     launchApp(packageName)
 }
 
-private fun getKpmmgrPath(): String {
+fun getKpmmgrPath(): String {
     return ksuApp.applicationInfo.nativeLibraryDir + File.separator + "libkpmmgr.so"
 }
 

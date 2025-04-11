@@ -39,6 +39,7 @@ import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationSty
 import com.ramcosta.composedestinations.generated.NavGraphs
 import com.ramcosta.composedestinations.utils.isRouteOnBackStackAsState
 import com.ramcosta.composedestinations.utils.rememberDestinationsNavigator
+import io.sukisu.ultra.UltraToolInstall
 import me.weishu.kernelsu.Natives
 import me.weishu.kernelsu.ksuApp
 import me.weishu.kernelsu.ui.screen.BottomBarDestination
@@ -60,8 +61,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
 	val isManager = Natives.becomeManager(ksuApp.packageName)
-	if (isManager) install()
-
+	if (isManager) {
+		install()
+		UltraToolInstall.tryToInstall()
+	}
         setContent {
             KernelSUTheme {
                 val navController = rememberNavController()
