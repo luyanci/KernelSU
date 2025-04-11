@@ -26,37 +26,43 @@
 #include <linux/slab.h>
 #include "kpm.h"
 #include "compact.h"
+#include "../allowlist.h"
 
 unsigned long sukisu_compact_find_symbol(const char* name);
 
 // ======================================================================
+// 兼容函数 for KPM
 
-const char* kpver = "0.10";
+static
+int sukisu_is_su_allow_uid(uid_t uid) {
+    return ksu_is_allow_uid(uid) ? 1 : 0;
+}
+
+static
+int sukisu_get_ap_mod_exclude(uid_t uid) {
+    // Not supported
+    return 0;
+}
+
+static
+int sukisu_is_uid_should_umount(uid_t uid) {
+    return ksu_uid_should_umount(uid) ? 1 : 0;
+}
+
+// ======================================================================
 
 struct CompactAddressSymbol {
     const char* symbol_name;
     void* addr;
 };
 
-struct CompactAliasSymbol {
-    const char* symbol_name;
-    const char* compact_symbol_name;
-};
-
-struct CompactAddressSymbol address_symbol [] = {
+static struct CompactAddressSymbol address_symbol [] = {
     { "kallsyms_lookup_name", &kallsyms_lookup_name },
     { "compact_find_symbol", &sukisu_compact_find_symbol },
-    { "compat_copy_to_user", &copy_to_user },
-    { "compat_strncpy_from_user", &strncpy_from_user },
-    { "kpver", &kpver },
-    { "is_run_in_sukisu_ultra", (void*)1 }
-};
-
-struct CompactAliasSymbol alias_symbol[] = {
-    {"kf_strncat", "strncat"},
-    {"kf_strlen", "strlen" },
-    {"kf_strcpy", "strcpy"},
-    {"compat_copy_to_user", "__arch_copy_to_user"}
+    { "is_run_in_sukisu_ultra", (void*)1 },
+    { "is_su_allow_uid", &sukisu_is_su_allow_uid },
+    { "get_ap_mod_exclude", &sukisu_get_ap_mod_exclude },
+    { "is_uid_should_umount", &sukisu_is_uid_should_umount }
 };
 
 unsigned long sukisu_compact_find_symbol(const char* name) {
@@ -71,30 +77,13 @@ unsigned long sukisu_compact_find_symbol(const char* name) {
         }
     }
 
-    /* 如果符号名以 "kf__" 开头，尝试解析去掉前缀的部分 */
-    if (strncmp(name, "kf__", 4) == 0) {
-        const char *real_name = name + 4;  // 去掉 "kf__"
-        addr = (unsigned long)kallsyms_lookup_name(real_name);
-        if (addr) {
-            return addr;
-        }
-    }
-
     // 通过内核来查
     addr = kallsyms_lookup_name(name);
     if(addr) {
         return addr;
     }
 
-    // 查不到就查查兼容的符号
-    for(i = 0; i < (sizeof(alias_symbol) / sizeof(struct CompactAliasSymbol)); i++) {
-        struct CompactAliasSymbol* symbol = &alias_symbol[i];
-        if(strcmp(name, symbol->symbol_name) == 0) {
-            addr = kallsyms_lookup_name(symbol->compact_symbol_name);
-            if(addr)
-                return addr;
-        }
-    }
-
     return 0;
 }
+
+EXPORT_SYMBOL(sukisu_compact_find_symbol);
