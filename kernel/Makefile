@@ -76,7 +76,7 @@ endif
 
 # https://github.com/tiann/KernelSU/pull/2102/files#diff-3a325663233178293ee38b8161f3be511a466af7e0156b9d03d5aed0497564bfR19
 IS_GKI := $(strip $(shell \
-    if [ "$(VERSION)" -ge "5" -a "$(PATCHLEVEL)" -ge "10" ]; then \
+    if [ "$(VERSION)" -ge "5" -a "$(PATCHLEVEL)" -ge "1" ]; then \
       echo TRUE; \
     else \
       echo FALSE; \
