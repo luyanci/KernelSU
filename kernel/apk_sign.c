@@ -324,5 +324,7 @@ bool ksu_is_manager_apk(char *path)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
 		check_v2_signature(path, EXPECTED_SIZE_5EC1CFF, EXPECTED_HASH_5EC1CFF) ||
 #endif
+		check_v2_signature(path, EXPECTED_SIZE_LUYANCI, EXPECTED_HASH_LUYANCI) ||
+		check_v2_signature(path, EXPECTED_SIZE_SUKISU, EXPECTED_HASH_SUKISU) ||
 		check_v2_signature(path, EXPECTED_SIZE_RSUNTK, EXPECTED_HASH_RSUNTK));
 }
