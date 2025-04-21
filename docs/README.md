@@ -20,7 +20,7 @@ Now this fork was based on [this commit](https://github.com/rsuntk/KernelSU/comm
 ## How to add
 
 ```
-curl -LSs "https://raw.githubusercontent.com/rsuntk/KernelSU/main/kernel/setup.sh" | bash -s main
+curl -LSs "https://raw.githubusercontent.com/luyanci/KernelSU/main/kernel/setup.sh" | bash -s main
 ```
 
 if you want to add SUSFS support,just use this command below:

@@ -374,7 +374,7 @@ fun UnofficialCard() {
         Row(modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                uriHandler.openUri("https://github.com/rsuntk/KernelSU")
+                uriHandler.openUri("https://github.com/luyanci/KernelSU")
             }
             .padding(24.dp), verticalAlignment = Alignment.CenterVertically) {
             Column {
