@@ -32,9 +32,11 @@ config KSU_CMDLINE
 	  Value 1 means enabled, value 0 means disabled.
 
 config KSU_COMPAT_GKI
-	bool "KernelSU Compat for GKI kernels"
-	default y if $(VERSION) >= 5 && $(PATCHLEVEL) >= 1
-	default n
+        bool "KernelSU Compat for GKI kernels"
+        default y if LINUX_VERSION_CODE >= KERNEL_VERSION(5,1,0)
+        default n
+        help
+          Enable KernelSU compatibility for GKI (Generic Kernel Image) kernels.
 
 config KSU_MANUAL_HOOK
 	bool "Manual hooking GKI kernels without kprobes"
