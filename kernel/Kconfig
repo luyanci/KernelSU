@@ -33,7 +33,7 @@ config KSU_CMDLINE
 
 config KSU_COMPAT_GKI
         bool "KernelSU Compat for GKI kernels"
-        default y if LINUX_VERSION_CODE >= KERNEL_VERSION(5,1,0)
+        default y if LINUX_VERSION_CODE >= 328704
         default n
 
 config KSU_MANUAL_HOOK
