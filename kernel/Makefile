@@ -29,6 +29,61 @@ $(warning "KSU_GIT_VERSION not defined! It is better to make KernelSU a git subm
 ccflags-y += -DKSU_VERSION=16
 endif
 
+# Determine the appropriate atomic function and apply patch accordingly
+ifeq ($(shell grep -q "atomic_inc_not_zero" $(srctree)/kernel/cred.c; echo $$?),0)
+ATOMIC_INC_FUNC = atomic_inc_not_zero
+else ifeq ($(shell grep -q "atomic_long_inc_not_zero" $(srctree)/kernel/cred.c; echo $$?),0)
+ATOMIC_INC_FUNC = atomic_long_inc_not_zero
+else
+$(info -- KernelSU: Neither atomic_inc_not_zero nor atomic_long_inc_not_zero found in kernel/cred.c)
+endif
+
+# Inform which function is being patched
+$(info -- KernelSU: Using $(ATOMIC_INC_FUNC) in get_cred_rcu patch.)
+
+ifneq ($(shell grep -Eq "^static int can_umount" $(srctree)/fs/namespace.c; echo $$?),0)
+$(info -- KernelSU: adding function 'static int can_umount(const struct path *path, int flags);' to $(srctree)/fs/namespace.c)
+CAN_UMOUNT = static int can_umount(const struct path *path, int flags)\n\
+{\n\t\
+        struct mount *mnt = real_mount(path->mnt);\n\t\
+        if (flags & ~(MNT_FORCE | MNT_DETACH | MNT_EXPIRE | UMOUNT_NOFOLLOW))\n\t\t\
+                return -EINVAL;\n\t\
+        if (!may_mount())\n\t\t\
+                return -EPERM;\n\t\
+        if (path->dentry != path->mnt->mnt_root)\n\t\t\
+                return -EINVAL;\n\t\
+        if (!check_mnt(mnt))\n\t\t\
+                return -EINVAL;\n\t\
+        if (mnt->mnt.mnt_flags & MNT_LOCKED)\n\t\t\
+                return -EINVAL;\n\t\
+        if (flags & MNT_FORCE && !capable(CAP_SYS_ADMIN))\n\t\t\
+                return -EPERM;\n\t\
+        return 0;\n\
+}\n
+$(shell sed -i '/^static bool is_mnt_ns_file/i $(CAN_UMOUNT)' $(srctree)/fs/namespace.c;)
+endif
+
+ifneq ($(shell grep -Eq "^int path_umount" $(srctree)/fs/namespace.c; echo $$?),0)
+$(info -- KernelSU: adding function 'int path_umount(struct path *path, int flags);' to $(srctree)/fs/namespace.c)
+PATH_UMOUNT = int path_umount(struct path *path, int flags)\n\
+{\n\t\
+        struct mount *mnt = real_mount(path->mnt);\n\t\
+        int ret;\n\t\
+        ret = can_umount(path, flags);\n\t\
+        if (!ret)\n\t\t\
+                ret = do_umount(mnt, flags);\n\t\
+        dput(path->dentry);\n\t\
+        mntput_no_expire(mnt);\n\t\
+        return ret;\n\
+}\n
+$(shell sed -i '/^static bool is_mnt_ns_file/i $(PATH_UMOUNT)' $(srctree)/fs/namespace.c;)
+endif
+
+ifneq ($(shell grep -Eq "^int path_umount" $(srctree)/fs/internal.h; echo $$?),0)
+$(shell sed -i '/^extern void __init mnt_init/a int path_umount(struct path *path, int flags);' $(srctree)/fs/internal.h;)
+$(info -- KernelSU: adding 'int path_umount(struct path *path, int flags);' to $(srctree)/fs/internal.h)
+endif
+
 # Do checks before compile
 ifeq ($(shell grep -q "int\s\+\path_umount" $(srctree)/fs/namespace.c; echo $$?),0)
 $(info -- KernelSU: checks ok. Found path_umount)
