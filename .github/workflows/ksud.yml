@@ -16,14 +16,25 @@ on:
 jobs:
   build:
     runs-on: ${{ inputs.os }}
+    env:
+      release_tag: '14641303884'
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
-    - name: Download artifacts
-      uses: actions/download-artifact@v4
-        
+    - name: Download prebuilt lkm file
+      uses: robinraju/release-downloader@v1
+      with:
+        repository: 'luyanci/ksu-lkm'
+        tag: ${{ env.release_tag }}
+        fileName: '*.ko'
+        out-file-path: 'lkm'
+
+    - name: Prepare LKM files
+      run: |
+        cp lkm/*_kernelsu.ko ./userspace/ksud/bin/aarch64/
+
     - name: Setup rustup
       run: |
         rustup update stable
