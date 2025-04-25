@@ -21,9 +21,18 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Download artifacts
-      uses: actions/download-artifact@v4
-        
+    - name: Download prebuilt LKM files
+      uses: robinraju/release-downloader@v1
+      with:
+        repository: 'rsuntk/ksu-lkm'
+        latest: true
+        fileName: '*.ko'
+        out-file-path: 'lkm'
+
+    - name: Prepare LKM files
+      run: |
+        cp lkm/*_kernelsu.ko ./userspace/ksud/bin/aarch64/
+
     - name: Setup rustup
       run: |
         rustup update stable
