@@ -92,11 +92,6 @@ $(info -- KernelSU: checks failed, abort.)
 $(error -- Backporting path_umount is mandatory !! Read: https://kernelsu.org/guide/how-to-integrate-for-non-gki.html#how-to-backport-path-umount)
 endif
 
-# Check arch
-ifneq ($(strip $(CONFIG_KSU_64BIT)),y)
-$(info -- KernelSU: Running in 32-bit mode.)
-endif
-
 # Checks hooks state
 ifeq ($(strip $(CONFIG_KSU_MANUAL_HOOK)),y)
 $(info -- KernelSU: Manually-patched hook.)
@@ -139,6 +134,11 @@ endif
 # Checks Samsung UH drivers
 ifeq ($(shell grep -q "CONFIG_KDP_CRED" $(srctree)/kernel/cred.c; echo $$?),0)
 ccflags-y += -DSAMSUNG_UH_DRIVER_EXIST
+endif
+
+# Samsung SELinux Porting
+ifeq ($(shell grep -q "SEC_SELINUX_PORTING_COMMON" $(srctree)/security/selinux/avc.c; echo $$?),0)
+ccflags-y += -DSAMSUNG_SELINUX_PORTING
 endif
 
 ifndef KSU_EXPECTED_SIZE
