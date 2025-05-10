@@ -4,7 +4,7 @@
 
 ### A Kernel-based root solution for Android devices.
 
-Now this fork was based on [this commit](https://github.com/rsuntk/KernelSU/commit/6118e3b8fa89bcda4e00e4d6e8deb901a99a125d)
+Now this fork was based on [this commit](https://github.com/rsuntk/KernelSU/commit/be33f8c3ca6146bbd054b054d63dac7328dcde24)
 
 > [!NOTE]
 > Official KernelSU support for Non-GKI kernels has been ended.
