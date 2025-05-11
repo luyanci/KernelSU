@@ -414,6 +414,9 @@ private fun InfoCard() {
             }
 
             InfoCardItem(stringResource(R.string.home_kernel), uname.release)
+            
+            Spacer(Modifier.height(16.dp))
+            InfoCardItem(stringResource(R.string.home_kernel_arch), uname.machine)
 
             Spacer(Modifier.height(16.dp))
             val managerVersion = getManagerVersion(context)
@@ -424,6 +427,9 @@ private fun InfoCard() {
 
             Spacer(Modifier.height(16.dp))
             InfoCardItem(stringResource(R.string.home_fingerprint), Build.FINGERPRINT)
+
+            Spacer(Modifier.height(16.dp))
+            InfoCardItem(stringResource(R.string.home_abi), Build.SUPPORTED_ABIS.joinToString(", "))
 
             Spacer(Modifier.height(16.dp))
             InfoCardItem(stringResource(R.string.home_selinux_status), getSELinuxStatus())
