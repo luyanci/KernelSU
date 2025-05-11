@@ -413,10 +413,10 @@ private fun InfoCard() {
                 Text(text = content, style = MaterialTheme.typography.bodyMedium)
             }
 
-            InfoCardItem(stringResource(R.string.home_kernel), uname.release)
-            
-            Spacer(Modifier.height(16.dp))
-            InfoCardItem(stringResource(R.string.home_kernel_arch), uname.machine)
+            InfoCardItem(
+                stringResource(R.string.home_kernel),
+                "${uname.release} (${uname.machine})"
+            )
 
             Spacer(Modifier.height(16.dp))
             val managerVersion = getManagerVersion(context)
