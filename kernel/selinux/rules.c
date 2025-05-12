@@ -91,7 +91,7 @@ void apply_kernelsu_rules()
 	ksu_allow(db, "init", "adb_data_file", "file", ALL);
 	ksu_allow(db, "init", "adb_data_file", "dir", ALL); // #1289
 	ksu_allow(db, "init", KERNEL_SU_DOMAIN, ALL, ALL);
-	
+
 	// we need to umount modules in zygote
 	ksu_allow(db, "zygote", "adb_data_file", "dir", "search");
 
@@ -173,8 +173,7 @@ struct sepol_data {
 };
 
 // ksud 32-bit on arm64 kernel
-#ifdef CONFIG_COMPAT
-struct sepol_data_compat {
+struct __maybe_unused sepol_data_compat {
 	u32 cmd;
 	u32 subcmd;
 	u32 field_sepol1;
@@ -185,7 +184,7 @@ struct sepol_data_compat {
 	u32 field_sepol6;
 	u32 field_sepol7;
 };
-#endif
+
 static int get_object(char *buf, char __user *user_object, size_t buf_sz,
 		      char **object)
 {
