@@ -9,7 +9,10 @@ Now this fork was based on [this commit](https://github.com/rsuntk/KernelSU/comm
 > [!NOTE]
 > Official KernelSU support for Non-GKI kernels has been ended.
 > 
-> This is unofficial fork, all rights reserved to [@tiann](https://github.com/tiann)
+> This is unofficial KernelSU fork, all changes are not guaranteed stable!
+>
+> All rights reserved to [@tiann](https://github.com/tiann), the author of KernelSU.
+>
 
 [![Latest release](https://img.shields.io/github/v/release/luyanci/KernelSU?label=Release&logo=github)](https://github.com/luyanci/KernelSU/releases/latest)
 [![Latest LKM release](https://img.shields.io/github/v/release/luyanci/ksu-lkm?label=Release&logo=github)](https://github.com/luyanci/ksu-lkm/releases/latest)
