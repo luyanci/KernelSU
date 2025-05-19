@@ -195,17 +195,6 @@ fn find_temp_path() -> String {
         return defs::TEMP_DIR.to_string();
     }
 
-    // Try to create a random directory in /dev/
-    let r = tempfile::tempdir_in("/dev/");
-    match r {
-        Ok(tmp_dir) => {
-            if let Some(path) = tmp_dir.into_path().to_str() {
-                return path.to_string();
-            }
-        }
-        Err(_e) => {}
-    }
-
     let dirs = [
         defs::TEMP_DIR,
         "/patch_hw",
