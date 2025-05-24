@@ -529,18 +529,10 @@ static bool should_umount(struct path *path)
 }
 
 #ifdef KSU_HAS_PATH_UMOUNT
-static void ksu_umount_mnt(struct path *path, int flags)
+static void ksu_path_umount(const char *mnt, struct path *path, int flags)
 {
 	int err = path_umount(path, flags);
-	if (err) {
-		pr_err("umount %s failed, err: %d\n",
-			path->dentry->d_iname, err);
-	} else {
-#ifdef CONFIG_KSU_DEBUG
-		pr_info("umount %s success\n",
-			path->dentry->d_iname);
-#endif
-	}
+	pr_info("%s: path: %s ret: %d\n", __func__, mnt, err);
 }
 #else
 static void ksu_sys_umount(const char *mnt, int flags)
@@ -551,7 +543,7 @@ static void ksu_sys_umount(const char *mnt, int flags)
 	set_fs(KERNEL_DS);
 	long ret = sys_umount(usermnt, flags); // cuz asmlinkage long sys##name
 	set_fs(old_fs);
-	pr_info("%s: path: %s code: %d \n", __func__, usermnt, ret);
+	pr_info("%s: path: %s ret: %d \n", __func__, usermnt, ret);
 }
 #endif
 
@@ -574,7 +566,7 @@ static void try_umount(const char *mnt, bool check_mnt, int flags)
 	}
 
 #ifdef KSU_HAS_PATH_UMOUNT
-	ksu_umount_mnt(&path, flags);
+	ksu_path_umount(mnt, &path, flags);
 #else
 	ksu_sys_umount(mnt, flags);
 #endif
