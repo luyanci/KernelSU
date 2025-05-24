@@ -8,14 +8,12 @@
 #include <linux/types.h>
 #include <linux/uaccess.h>
 #include <linux/version.h>
+#include <linux/ptrace.h>
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
 #include <linux/sched/task_stack.h>
 #else
 #include <linux/sched.h>
 #endif
-
-/* current_user_stack_pointer */
-#include <linux/ptrace.h>
 
 #include "objsec.h"
 #include "allowlist.h"
@@ -166,7 +164,7 @@ int ksu_handle_execve_sucompat(int *fd, const char __user **filename_user,
 	 * some cpus dont really have that good speculative execution
 	 * access_ok to substitute set_fs, we check if pointer is accessible
 	 */
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5,0,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 0, 0)
 	if (!access_ok(VERIFY_READ, *filename_user, sizeof(path)))
 		return 0;
 #else
