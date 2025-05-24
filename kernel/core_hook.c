@@ -180,7 +180,7 @@ void escape_to_root(void)
 	       sizeof(cred->cap_bset));
 
 	setup_groups(profile, cred);
-	
+
 	rcu_read_unlock();
 
 	// Refer to kernel/seccomp.c: seccomp_set_mode_strict
