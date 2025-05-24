@@ -70,9 +70,7 @@ fun Uri.getFileName(context: Context): String? {
 
 fun createRootShell(globalMnt: Boolean = false): Shell {
     Shell.enableVerboseLogging = BuildConfig.DEBUG
-    val builder = Shell.Builder.create().apply {
-        setFlags(Shell.FLAG_MOUNT_MASTER)
-    }
+    val builder = Shell.Builder.create()
 
     return try {
         if (globalMnt) {
@@ -366,14 +364,14 @@ fun hasMagisk(): Boolean {
 fun isGlobalNamespaceEnabled(): Boolean {
     val shell = getRootShell()
     val result =
-        ShellUtils.fastCmd(shell, "nsenter --mount=/proc/1/ns/mnt cat ${Natives.GLOBAL_NAMESPACE_FILE}")
+        ShellUtils.fastCmd(shell, "cat ${Natives.GLOBAL_NAMESPACE_FILE}")
     Log.i(TAG, "is global namespace enabled: $result")
     return result == "1"
 }
 
 fun setGlobalNamespaceEnabled(value: String) {
     getRootShell().newJob()
-        .add("nsenter --mount=/proc/1/ns/mnt echo $value > ${Natives.GLOBAL_NAMESPACE_FILE}")
+        .add("echo $value > ${Natives.GLOBAL_NAMESPACE_FILE}")
         .submit { result ->
             Log.i(TAG, "setGlobalNamespaceEnabled result: ${result.isSuccess} [${result.out}]")
         }
