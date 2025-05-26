@@ -24,7 +24,7 @@
 #include <linux/fs.h>
 #include <linux/namei.h>
 #ifndef KSU_HAS_PATH_UMOUNT
-#include <linux/syscalls.h> // sys_umount
+#include <linux/syscalls.h> // sys_umount (<4.17) & ksys_umount (4.17+)
 #endif
 
 #ifdef MODULE
@@ -528,11 +528,11 @@ static bool should_umount(struct path *path)
 	return false;
 }
 
-#ifdef KSU_HAS_PATH_UMOUNT
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0) || defined(KSU_HAS_PATH_UMOUNT)
 static void ksu_path_umount(const char *mnt, struct path *path, int flags)
 {
-	int err = path_umount(path, flags);
-	pr_info("%s: path: %s ret: %d\n", __func__, mnt, err);
+	int ret = path_umount(path, flags);
+	pr_info("%s: path: %s ret: %d\n", __func__, mnt, ret);
 }
 #else
 static void ksu_sys_umount(const char *mnt, int flags)
@@ -547,7 +547,7 @@ static void ksu_sys_umount(const char *mnt, int flags)
 	long ret = sys_umount(usermnt, flags); // cuz asmlinkage long sys##name
 #endif
 	set_fs(old_fs);
-	pr_info("%s: path: %s ret: %d \n", __func__, usermnt, ret);
+	pr_info("%s: path: %s ret: %d\n", __func__, usermnt, ret);
 }
 #endif
 
