@@ -9,6 +9,7 @@ import androidx.compose.animation.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
@@ -244,26 +245,56 @@ private fun StatusCard(
             .padding(24.dp), verticalAlignment = Alignment.CenterVertically) {
             when {
                 ksuVersion != null -> {
-                    val safeMode = when {
-                        Natives.isSafeMode -> " [${stringResource(id = R.string.safe_mode)}]"
-                        else -> ""
-                    }
 
-                    val workingMode = when (lkmMode) {
-                        null -> " <Non-GKI>"
-                        true -> " <LKM>"
-                        else -> " <GKI>"
+                    val workingModeText = when {
+                        lkmMode == true -> "LKM"
+                        lkmMode == false || kernelVersion.isGKI() -> "GKI"
+                        else -> "LEGACY"
                     }
-
-                    val workingText =
-                        "${stringResource(id = R.string.home_working)}$workingMode$safeMode"
 
                     Icon(Icons.Outlined.CheckCircle, stringResource(R.string.home_working))
                     Column(Modifier.padding(start = 20.dp)) {
-                        Text(
-                            text = workingText,
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.home_working),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+
+                            Spacer(Modifier.width(8.dp))
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                            ) {
+                                Text(
+                                    text = workingModeText,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSecondary,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+
+                            if (Natives.isSafeMode) {
+                                Spacer(Modifier.width(6.dp))
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.safe_mode),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.onSecondary,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
+                            }
+                        }
+
                         Spacer(Modifier.height(4.dp))
                         Text(
                             text = stringResource(R.string.home_working_version, ksuVersion),
