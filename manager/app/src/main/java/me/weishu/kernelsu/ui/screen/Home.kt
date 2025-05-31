@@ -13,10 +13,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Block
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -252,7 +252,7 @@ private fun StatusCard(
                         else -> "LEGACY"
                     }
 
-                    Icon(Icons.Outlined.CheckCircle, stringResource(R.string.home_working))
+                    Icon(Icons.Filled.CheckCircle, stringResource(R.string.home_working))
                     Column(Modifier.padding(start = 20.dp)) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
