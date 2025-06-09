@@ -535,16 +535,19 @@ static void ksu_path_umount(const char *mnt, struct path *path, int flags)
 	pr_info("%s: path: %s ret: %d\n", __func__, mnt, ret);
 }
 #else
+// TODO: Search a way to make this works without set_fs functions
 static void ksu_sys_umount(const char *mnt, int flags)
 {
 	char __user *usermnt = (char __user *)mnt;
-
-	mm_segment_t old_fs = get_fs();
+	mm_segment_t old_fs;
+	int ret; // although asmlinkage long
+	
+	old_fs = get_fs();
 	set_fs(KERNEL_DS);
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 17, 0)
-	int ret = ksys_umount(usermnt, flags);
+	ret = ksys_umount(usermnt, flags);
 #else
-	long ret = sys_umount(usermnt, flags); // cuz asmlinkage long sys##name
+	ret = sys_umount(usermnt, flags); // cuz asmlinkage long sys##name
 #endif
 	set_fs(old_fs);
 	pr_info("%s: path: %s ret: %d\n", __func__, usermnt, ret);
