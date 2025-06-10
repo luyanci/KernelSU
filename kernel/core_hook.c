@@ -138,18 +138,23 @@ void escape_to_root(void)
 {
 	struct cred *cred;
 
+	if (current_euid().val == 0) {
+		pr_warn("Already root, don't escape!\n");
+		return;
+	}
+
 	rcu_read_lock();
 
 	do {
 		cred = (struct cred *)__task_cred((current));
-		BUG_ON(!cred);
+		if (!cred) {
+			pr_err("%s: cred is NULL! bailing out..\n", __func__);
+			rcu_read_unlock();
+			return;
+		}
 	} while (!get_cred_rcu(cred));
 
-	if (cred->euid.val == 0) {
-		pr_warn("Already root, don't escape!\n");
-		rcu_read_unlock();
-		return;
-	}
+	rcu_read_unlock();
 
 	struct root_profile *profile = ksu_get_root_profile(cred->uid.val);
 
@@ -181,7 +186,7 @@ void escape_to_root(void)
 
 	setup_groups(profile, cred);
 
-	rcu_read_unlock();
+	put_cred(cred); // - release here - include/linux/cred.h
 
 	// Refer to kernel/seccomp.c: seccomp_set_mode_strict
 	// When disabling Seccomp, ensure that current->sighand->siglock is held during the operation.
@@ -541,7 +546,7 @@ static void ksu_sys_umount(const char *mnt, int flags)
 	char __user *usermnt = (char __user *)mnt;
 	mm_segment_t old_fs;
 	int ret; // although asmlinkage long
-	
+
 	old_fs = get_fs();
 	set_fs(KERNEL_DS);
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 17, 0)
@@ -637,7 +642,7 @@ int ksu_handle_setuid(struct cred *new, const struct cred *old)
 	try_umount("/vendor", true, 0);
 	try_umount("/product", true, 0);
 	try_umount("/system_ext", true, 0);
-	
+
 	// try umount modules path
 	try_umount("/data/adb/modules", false, MNT_DETACH);
 
