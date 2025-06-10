@@ -569,6 +569,7 @@ static void try_umount(const char *mnt, bool check_mnt, int flags)
 
 	if (path.dentry != path.mnt->mnt_root) {
 		// it is not root mountpoint, maybe umounted by others already.
+		path_put(&path);
 		return;
 	}
 
@@ -582,6 +583,7 @@ static void try_umount(const char *mnt, bool check_mnt, int flags)
 #else
 	ksu_sys_umount(mnt, flags);
 #endif
+	path_put(&path);
 }
 
 int ksu_handle_setuid(struct cred *new, const struct cred *old)
