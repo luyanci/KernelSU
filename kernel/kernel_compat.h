@@ -7,27 +7,6 @@
 #include "ss/policydb.h"
 #include "linux/key.h"
 
-// for kernel without get_cred_rcu
-#ifndef KSU_COMPAT_HAS_GET_CRED_RCU
-static inline const struct cred *get_cred_rcu(const struct cred *cred)
-{
-	struct cred *nonconst_cred = (struct cred *) cred;
-	if (!cred)
-		return NULL;
-#ifdef KSU_COMPAT_ATOMIC_LONG
-	if (!atomic_long_inc_not_zero(&nonconst_cred->usage))
-#else
-	if (!atomic_inc_not_zero(&nonconst_cred->usage))
-#endif		
-		return NULL;
-	validate_creds(cred);
-#ifdef KSU_COMPAT_HAS_NONCONST_CRED
-	nonconst_cred->non_rcu = 0;
-#endif
-	return cred;
-}
-#endif
-
 /*
  * Adapt to Huawei HISI kernel without affecting other kernels ,
  * Huawei Hisi Kernel EBITMAP Enable or Disable Flag ,
