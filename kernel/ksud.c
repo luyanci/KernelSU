@@ -639,9 +639,6 @@ bool __maybe_unused is_ksu_transition(const struct task_security_struct *old_tse
 	u32 seclen;
 	bool allowed = false;
 
-	if (!ksu_execveat_hook) // not needed anymore once ksud ran
-		return false;
-
 	if (!ksu_sid)
 		security_secctx_to_secid("u:r:su:s0", strlen("u:r:su:s0"), &ksu_sid);
 
