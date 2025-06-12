@@ -579,7 +579,6 @@ static void try_umount(const char *mnt, bool check_mnt, int flags)
 #else
 	ksu_sys_umount(mnt, flags);
 #endif
-	path_put(&path);
 }
 
 int ksu_handle_setuid(struct cred *new, const struct cred *old)
