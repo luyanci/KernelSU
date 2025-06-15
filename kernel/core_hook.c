@@ -687,11 +687,34 @@ static int ksu_task_fix_setuid(struct cred *new, const struct cred *old,
 	return ksu_handle_setuid(new, old);
 }
 
+/* 
+ * Keep in mind, since kprobes already have pre handler, we must
+ * guard it with CONFIG_KSU_KPROBES_HOOK, although it is possible to
+ * disable kprobes pre handler, but this is way more simple.
+ * However, if you wanna use LSM hooks, feel free to fork.
+ */
+#if !defined(KSU_HAS_DEVPTS_HANDLER) && !defined(CONFIG_KSU_KPROBES_HOOK)
+extern int ksu_handle_devpts(struct inode *inode);
+static int ksu_inode_permission(struct inode *inode, int mask)
+{
+	if (unlikely(inode->i_sb && inode->i_sb->s_magic == DEVPTS_SUPER_MAGIC)) {
+#ifdef CONFIG_KSU_DEBUG
+		pr_info("%s: devpts inode accessed with mask: %x\n", __func__, mask);
+#endif
+		ksu_handle_devpts(inode);
+	}
+	return 0;
+}
+#endif
+
 #ifndef MODULE
 static struct security_hook_list ksu_hooks[] = {
 	LSM_HOOK_INIT(task_prctl, ksu_task_prctl),
 	LSM_HOOK_INIT(inode_rename, ksu_inode_rename),
 	LSM_HOOK_INIT(task_fix_setuid, ksu_task_fix_setuid),
+#if !defined(KSU_HAS_DEVPTS_HANDLER) && !defined(CONFIG_KSU_KPROBES_HOOK)
+	LSM_HOOK_INIT(inode_permission, ksu_inode_permission),
+#endif
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0) ||	\
 	defined(CONFIG_IS_HW_HISI) ||	\
 	defined(CONFIG_KSU_ALLOWLIST_WORKAROUND)
