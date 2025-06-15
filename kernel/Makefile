@@ -60,8 +60,8 @@ ccflags-y += -DKSU_HAS_PATH_UMOUNT
 endif
 
 # we have pts_unix98/devpts_get_priv hook compat !!
-KSU_HAS_DEVPTS_INODE := $(shell grep -q "int\s\+ksu_handle_devpts" $(srctree)/fs/devpts/inode.c; echo $$?)
-KSU_HAS_PTS_UNIX98 := $(shell grep -q "int\s\+ksu_handle_devpts" $(srctree)/drivers/tty/pty.c; echo $$?)
+KSU_HAS_DEVPTS_INODE := $(shell grep -q "ksu_handle_devpts" $(srctree)/fs/devpts/inode.c; echo $$?)
+KSU_HAS_PTS_UNIX98 := $(shell grep -q "ksu_handle_devpts" $(srctree)/drivers/tty/pty.c; echo $$?)
 
 # It's impossible to have them both! neither KSU_HAS_DEVPTS_INODE/PTS_UNIX98 will detect 1 value!
 # If both of them weren't exist, KSU_HAS_DEVPTS_HANDLER value gonna be 2.
