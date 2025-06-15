@@ -8,7 +8,6 @@
 #include <linux/slab.h>
 #include <linux/types.h>
 #include <linux/version.h>
-#include <linux/kconfig.h>
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)
 #include <linux/compiler_types.h>
 #endif
@@ -363,13 +362,7 @@ void do_save_allow_list(struct work_struct *work)
 	struct file *fp =
 		ksu_filp_open_compat(KERNEL_SU_ALLOWLIST, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (IS_ERR(fp)) {
-		if ((PTR_ERR(fp) == -ENOKEY) && !IS_ENABLED(CONFIG_KSU_ALLOWLIST_WORKAROUND)) {
-			pr_info("filp_open: required key not found! (-ENOKEY)\n");
-			pr_info("Try enable CONFIG_KSU_ALLOWLIST_WORKAROUND in your kernel.\n");
-			pr_info("If you still encountered issue with allowlist, please report it.\n");
-			return;
-		} else
-			pr_err("save_allow_list create file failed: %ld\n", PTR_ERR(fp));
+		pr_err("save_allow_list create file failed: %ld\n", PTR_ERR(fp));
 		return;
 	}
 
@@ -388,7 +381,7 @@ void do_save_allow_list(struct work_struct *work)
 
 	list_for_each (pos, &allow_list) {
 		p = list_entry(pos, struct perm_data, list);
-		pr_info("save allow list, name: %s uid :%d, allow: %d\n",
+		pr_info("save allow list, name: %s uid: %d, allow: %d\n",
 			p->profile.key, p->profile.current_uid,
 			p->profile.allow_su);
 
