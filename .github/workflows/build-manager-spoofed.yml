@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main", "ci" ]
     paths:
-      - '.github/workflows/build-manager.yml'
+      - '.github/workflows/build-manager-common.yml'
       - 'manager/**'
       - 'kernel/**'
       - 'userspace/ksud/**'
