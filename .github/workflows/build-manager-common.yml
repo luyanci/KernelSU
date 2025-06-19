@@ -135,7 +135,6 @@ jobs:
           if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
             if [ "${{ steps.spoofed_state.outputs.IS_SPOOFED }}" == "true" ]; then
               export TITLE="Spoofed Manager"
-              export SPOOFED="true"
             else
               export TITLE="Manager"
             fi
