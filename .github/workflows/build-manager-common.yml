@@ -23,8 +23,8 @@ jobs:
 
   build-manager-common:
     needs: build-ksud
-    runs-on: ubuntu-latest
     environment: signing
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./manager
