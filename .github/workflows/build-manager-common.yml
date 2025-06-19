@@ -54,6 +54,15 @@ jobs:
             echo "UPLOAD=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: set topicid
+        id: set_topicid
+        run: |
+          if [ "${{ steps.spoofed_state.outputs.IS_SPOOFED}}" == "true"]; then
+            echo "TOPICID=857" >> $GITHUB_OUTPUT
+          else
+            echo "TOPICID=${{ secrets.MESSAGE_THREAD_ID }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Write key
         if: ${{ ( github.event_name != 'pull_request' && github.ref == 'refs/heads/main' ) || github.ref_type == 'tag' }}
         run: |
@@ -127,7 +136,7 @@ jobs:
         env:
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          MESSAGE_THREAD_ID: ${{ secrets.MESSAGE_THREAD_ID }}
+          MESSAGE_THREAD_ID: ${{ steps.set_topicid.outputs.TOPICID }}
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
           COMMIT_URL: ${{ github.event.head_commit.url }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
