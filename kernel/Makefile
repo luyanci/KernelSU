@@ -63,10 +63,13 @@ endif
 KSU_HAS_DEVPTS_INODE := $(shell grep -q "ksu_handle_devpts" $(srctree)/fs/devpts/inode.c; echo $$?)
 KSU_HAS_PTS_UNIX98 := $(shell grep -q "ksu_handle_devpts" $(srctree)/drivers/tty/pty.c; echo $$?)
 
-# It's impossible to have them both! neither KSU_HAS_DEVPTS_INODE/PTS_UNIX98 will detect 1 value!
-# If both of them weren't exist, KSU_HAS_DEVPTS_HANDLER value gonna be 2.
+# Codes:
+# - 0: Both of them exist (impossible)
+# - 1: Neither fs/devpts/inode.c or drivers/tty/pty.c have ksu_handle_devpts
+# - 2: Both of them did not exist
 $(eval KSU_DEVPTS_HANDLER_EXIST=$(shell expr $(KSU_HAS_DEVPTS_INODE) + $(KSU_HAS_PTS_UNIX98)))
 ifeq ($(KSU_DEVPTS_HANDLER_EXIST),1)
+$(info -- KernelSU: Kernel have devpts handler)
 ccflags-y += -DKSU_HAS_DEVPTS_HANDLER
 endif
 
