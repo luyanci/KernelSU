@@ -59,20 +59,6 @@ ifeq ($(shell grep -q "int\s\+path_umount" $(srctree)/fs/namespace.c; echo $$?),
 ccflags-y += -DKSU_HAS_PATH_UMOUNT
 endif
 
-# we have pts_unix98/devpts_get_priv hook compat !!
-KSU_HAS_DEVPTS_INODE := $(shell grep -q "ksu_handle_devpts" $(srctree)/fs/devpts/inode.c; echo $$?)
-KSU_HAS_PTS_UNIX98 := $(shell grep -q "ksu_handle_devpts" $(srctree)/drivers/tty/pty.c; echo $$?)
-
-# Codes:
-# - 0: Both of them exist (impossible)
-# - 1: Neither fs/devpts/inode.c or drivers/tty/pty.c have ksu_handle_devpts
-# - 2: Both of them did not exist
-$(eval KSU_DEVPTS_HANDLER_EXIST=$(shell expr $(KSU_HAS_DEVPTS_INODE) + $(KSU_HAS_PTS_UNIX98)))
-ifeq ($(KSU_DEVPTS_HANDLER_EXIST),1)
-$(info -- KernelSU: Kernel have devpts handler)
-ccflags-y += -DKSU_HAS_DEVPTS_HANDLER
-endif
-
 # Checks Samsung UH drivers
 ifeq ($(shell grep -q "CONFIG_KDP_CRED" $(srctree)/kernel/cred.c; echo $$?),0)
 ccflags-y += -DSAMSUNG_UH_DRIVER_EXIST

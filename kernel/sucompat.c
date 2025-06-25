@@ -193,14 +193,8 @@ int ksu_handle_execve_sucompat(int *fd, const char __user **filename_user,
 	return 0;
 }
 
-int ksu_handle_devpts(struct inode *inode)
+static int ksu_inline_handle_devpts(struct inode *inode)
 {
-#ifndef CONFIG_KSU_KPROBES_HOOK
-	if (!ksu_sucompat_hook_state) {
-		return 0;
-	}
-#endif
-
 	if (!current->mm) {
 		return 0;
 	}
@@ -226,6 +220,22 @@ int ksu_handle_devpts(struct inode *inode)
 		}
 	}
 
+	return 0;
+}
+
+int __ksu_handle_devpts(struct inode *inode)
+{
+#ifndef CONFIG_KSU_KPROBES_HOOK
+	if (!ksu_sucompat_hook_state) {
+		return 0;
+	}
+#endif
+	return ksu_inline_handle_devpts(inode);
+}
+
+// dead code, we are phasing out ksu_handle_devpts for LSM hooks.
+int __maybe_unused ksu_handle_devpts(struct inode *inode)
+{
 	return 0;
 }
 
@@ -275,7 +285,7 @@ static int pts_unix98_lookup_pre(struct kprobe *p, struct pt_regs *regs)
 	inode = (struct inode *)PT_REGS_PARM2(regs);
 #endif
 
-	return ksu_handle_devpts(inode);
+	return ksu_inline_handle_devpts(inode);
 }
 #else
 static struct kprobe *su_kps[5];
