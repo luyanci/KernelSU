@@ -1109,6 +1109,8 @@ int ksu_handle_setuid(struct cred *new, const struct cred *old)
 	//   spawned by zygote which KSU will ignore it by default, the only fix for now is to
 	//   force a umount for those uid
 	// - Therefore make sure your root app doesn't use isolated service for root access
+	// - Kudos to ThePedroo, the author and maintainer of Rezygisk for finding and reporting
+	//   the detection, really big helps here!
 	if (new_uid.val >= 90000 && new_uid.val < 1000000) {
 		task_lock(current);
 		current->susfs_task_state |= TASK_STRUCT_NON_ROOT_USER_APP_PROC;
