@@ -576,7 +576,13 @@ static void ksu_sys_umount(const char *mnt, int flags)
 	set_fs(old_fs);
 	pr_info("%s: path: %s ret: %d\n", __func__, usermnt, ret);
 }
-#define ksu_umount_mnt(mnt, __unused, flags)	(ksu_sys_umount(mnt, flags))
+
+#define ksu_umount_mnt(mnt, __unused, flags)	\
+	({					\
+		path_put(__unused);		\
+		ksu_sys_umount(mnt, flags);	\
+	})
+
 #endif 
 
 static void try_umount(const char *mnt, bool check_mnt, int flags)
