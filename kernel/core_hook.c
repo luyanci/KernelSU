@@ -48,7 +48,6 @@
 #include "manager.h"
 #include "selinux/selinux.h"
 #include "throne_tracker.h"
-#include "throne_tracker.h"
 #include "kernel_compat.h"
 
 #ifdef CONFIG_KSU_SUSFS
@@ -71,6 +70,7 @@ extern void susfs_run_try_umount_for_current_mnt_ns(void);
 #endif // #ifdef CONFIG_KSU_SUSFS_TRY_UMOUNT
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 static bool susfs_is_umount_for_zygote_system_process_enabled = false;
+static bool susfs_is_umount_for_zygote_iso_service_enabled = false;
 extern bool susfs_hide_sus_mnts_for_all_procs;
 #endif // #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 #ifdef CONFIG_KSU_SUSFS_AUTO_ADD_SUS_BIND_MOUNT
@@ -586,6 +586,18 @@ int ksu_handle_prctl(int option, unsigned long arg2, unsigned long arg3,
 				pr_info("susfs: copy_to_user() failed\n");
 			return 0;
 		}
+		if (arg2 == CMD_SUSFS_UMOUNT_FOR_ZYGOTE_ISO_SERVICE) {
+			int error = 0;
+			if (arg3 != 0 && arg3 != 1) {
+				pr_err("susfs: CMD_SUSFS_UMOUNT_FOR_ZYGOTE_ISO_SERVICE -> arg3 can only be 0 or 1\n");
+				return 0;
+			}
+			susfs_is_umount_for_zygote_iso_service_enabled = arg3;
+			pr_info("susfs: CMD_SUSFS_UMOUNT_FOR_ZYGOTE_ISO_SERVICE -> susfs_is_umount_for_zygote_iso_service_enabled: %lu\n", arg3);
+			if (copy_to_user((void __user*)arg5, &error, sizeof(error)))
+				pr_info("susfs: copy_to_user() failed\n");
+			return 0;
+		}
 #endif //#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 #ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
 		if (arg2 == CMD_SUSFS_ADD_SUS_KSTAT) {
@@ -1074,7 +1086,7 @@ int ksu_handle_setuid(struct cred *new, const struct cred *old)
 	//   the detection, really big helps here!
 	if (new_uid.val >= 90000 && new_uid.val < 1000000) {
 		task_lock(current);
-		current->susfs_task_state |= TASK_STRUCT_NON_ROOT_USER_APP_PROC;
+		susfs_set_current_non_root_user_app_proc();
 		task_unlock(current);
 	}
 #endif
@@ -1091,11 +1103,15 @@ int ksu_handle_setuid(struct cred *new, const struct cred *old)
 #ifdef CONFIG_KSU_SUSFS
 	else {
 		task_lock(current);
-		current->susfs_task_state |= TASK_STRUCT_NON_ROOT_USER_APP_PROC;
+		susfs_set_current_non_root_user_app_proc();
 		task_unlock(current);
-		goto out_susfs_try_umount_all;
+#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
+		if (susfs_is_umount_for_zygote_iso_service_enabled) {
+			goto out_susfs_try_umount_all;
+		}
+#endif // #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 	}
-#endif
+#endif // #ifdef CONFIG_KSU_SUSFS
 
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 out_ksu_try_umount:
@@ -1108,7 +1124,7 @@ out_ksu_try_umount:
 #endif
 	}
 
-#ifndef CONFIG_KSU_SUSFS_SUS_MOUNT
+#ifndef CONFIG_KSU_SUSFS
 	// check old process's selinux context, if it is not zygote, ignore it!
 	// because some su apps may setuid to untrusted_app but they are in global mount namespace
 	// when we umount for such process, that is a disaster!
