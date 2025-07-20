@@ -34,9 +34,7 @@ static struct apk_sign_key {
 	{EXPECTED_SIZE_SUKISU, EXPECTED_HASH_SUKISU}, // SUKISU
 	{EXPECTED_SIZE_YUKONG, EXPECTED_HASH_YUKONG}, // YuKongA/KernelSU
 	{EXPECTED_SIZE_ZAKO, EXPECTED_HASH_ZAKO}, // SUKISU Zako
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
 	{EXPECTED_SIZE_5EC1CFF, EXPECTED_HASH_5EC1CFF}, // MKSU
-#endif
 };
 
 static struct sdesc *init_sdesc(struct crypto_shash *alg)
