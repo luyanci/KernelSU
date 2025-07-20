@@ -255,7 +255,7 @@ static void nuke_ext4_sysfs() {
 static inline void nuke_ext4_sysfs() { }
 #endif
 
-+static bool is_system_bin_su()
+static bool is_system_bin_su()
 {
 	// YES in_execve becomes 0 when it succeeds.
 	if (!current->mm || current->in_execve) 
