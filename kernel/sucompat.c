@@ -25,9 +25,7 @@
 #define SU_PATH "/system/bin/su"
 #define SH_PATH "/system/bin/sh"
 
-static const char sh_path[] = SH_PATH;
 static const char su[] = SU_PATH;
-static const char ksud_path[] = KSUD_PATH;
 
 extern void escape_to_root();
 
@@ -44,11 +42,13 @@ static inline void __user *userspace_stack_buffer(const void *d, size_t len)
 
 static inline char __user *sh_user_path(void)
 {
+	const char sh_path[] = SH_PATH;
 	return userspace_stack_buffer(sh_path, sizeof(sh_path));
 }
 
 static inline char __user *ksud_user_path(void)
 {
+	const char ksud_path[] = KSUD_PATH;
 	return userspace_stack_buffer(ksud_path, sizeof(ksud_path));
 }
 
@@ -112,6 +112,7 @@ int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
 				 int *__never_use_flags)
 {
 	struct filename *filename;
+	const char sh[] = KSUD_PATH;
 #ifndef CONFIG_KSU_KPROBES_HOOK
 	if (!ksu_sucompat_hook_state) {
 		return 0;
