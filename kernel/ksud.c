@@ -566,7 +566,7 @@ static void do_stop_input_hook(struct work_struct *work)
 	unregister_kprobe(&input_event_kp);
 }
 #else
-static int ksu_common_execve_ksud(const char __user *filename_user,
+static int ksu_execve_ksud_common(const char __user *filename_user,
 			struct user_arg_ptr *argv)
 {
 	struct filename filename_in, *filename_p;
@@ -594,7 +594,7 @@ int __maybe_unused ksu_handle_execve_ksud(const char __user *filename_user,
 			const char __user *const __user *__argv)
 {
 	struct user_arg_ptr argv = { .ptr.native = __argv };
-	return ksu_common_execve_ksud(filename_user, &argv);
+	return ksu_execve_ksud_common(filename_user, &argv);
 }
 
 #if defined(CONFIG_COMPAT) && defined(CONFIG_64BIT)
@@ -602,7 +602,7 @@ int __maybe_unused ksu_handle_compat_execve_ksud(const char __user *filename_use
 			const compat_uptr_t __user *__argv)
 {
 	struct user_arg_ptr argv = { .ptr.compat = __argv };
-	return ksu_common_execve_ksud(filename_user, &argv);
+	return ksu_execve_ksud_common(filename_user, &argv);
 }
 #endif /* COMPAT & 64BIT */
 
