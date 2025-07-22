@@ -571,6 +571,7 @@ static int ksu_execve_ksud_common(const char __user *filename_user,
 {
 	struct filename filename_in, *filename_p;
 	char path[32];
+	long len;
 	
 	// return early if disabled.
 	if (!ksu_execveat_hook) {
@@ -580,8 +581,11 @@ static int ksu_execve_ksud_common(const char __user *filename_user,
 	if (!filename_user)
 		return 0;
 
-	memset(path, 0, sizeof(path));
-	ksu_strncpy_from_user_nofault(path, filename_user, 32);
+	len = ksu_strncpy_from_user_nofault(path, filename_user, 32);
+	if (len <= 0)
+		return 0;
+
+	path[sizeof(path) - 1] = '\0';
 
 	// this is because ksu_handle_execveat_ksud calls it filename->name
 	filename_in.name = path;
