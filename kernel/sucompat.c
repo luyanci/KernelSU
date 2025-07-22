@@ -25,11 +25,15 @@
 #define SU_PATH "/system/bin/su"
 #define SH_PATH "/system/bin/sh"
 
+static const char sh_path = SH_PATH;
+static const char su_path = SU_PATH;
+static const char ksud_path[] = KSUD_PATH;
+
 extern void escape_to_root();
 
 bool ksu_sucompat_hook_state __read_mostly = true;
 
-static void __user *userspace_stack_buffer(const void *d, size_t len)
+static inline void __user *userspace_stack_buffer(const void *d, size_t len)
 {
 	/* To avoid having to mmap a page in userspace, just write below the stack
    * pointer. */
@@ -38,26 +42,19 @@ static void __user *userspace_stack_buffer(const void *d, size_t len)
 	return copy_to_user(p, d, len) ? NULL : p;
 }
 
-static char __user *sh_user_path(void)
+static inline char __user *sh_user_path(void)
 {
-	static const char sh_path[] = "/system/bin/sh";
-
 	return userspace_stack_buffer(sh_path, sizeof(sh_path));
 }
 
-static char __user *ksud_user_path(void)
+static inline char __user *ksud_user_path(void)
 {
-	static const char ksud_path[] = KSUD_PATH;
-
 	return userspace_stack_buffer(ksud_path, sizeof(ksud_path));
 }
 
 int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode,
 			 int *__unused_flags)
 {
-
-	const char su[] = SU_PATH;
-
 #ifndef CONFIG_KSU_KPROBES_HOOK
 	if (!ksu_sucompat_hook_state) {
 		return 0;
@@ -82,9 +79,6 @@ int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode,
 
 int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags)
 {
-	// const char sh[] = SH_PATH;
-	const char su[] = SU_PATH;
-
 #ifndef CONFIG_KSU_KPROBES_HOOK
 	if (!ksu_sucompat_hook_state) {
 		return 0;
@@ -118,9 +112,6 @@ int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
 				 int *__never_use_flags)
 {
 	struct filename *filename;
-	const char sh[] = KSUD_PATH;
-	const char su[] = SU_PATH;
-
 #ifndef CONFIG_KSU_KPROBES_HOOK
 	if (!ksu_sucompat_hook_state) {
 		return 0;
@@ -153,7 +144,6 @@ int ksu_handle_execve_sucompat(int *fd, const char __user **filename_user,
 			       void *__never_use_argv, void *__never_use_envp,
 			       int *__never_use_flags)
 {
-	const char su[] = SU_PATH;
 	char path[sizeof(su) + 1];
 
 	if (unlikely(!filename_user))

@@ -44,7 +44,6 @@
 #include "manager.h"
 #include "selinux/selinux.h"
 #include "throne_tracker.h"
-#include "throne_tracker.h"
 #include "kernel_compat.h"
 
 static bool ksu_module_mounted = false;
@@ -579,7 +578,7 @@ static void ksu_sys_umount(const char *mnt, int flags)
 	set_fs(old_fs);
 	pr_info("%s: path: %s ret: %d\n", __func__, usermnt, ret);
 }
-#endif
+#endif 
 
 static void try_umount(const char *mnt, bool check_mnt, int flags)
 {

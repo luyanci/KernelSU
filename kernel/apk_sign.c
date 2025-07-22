@@ -28,13 +28,16 @@ static struct apk_sign_key {
 	unsigned size;
 	const char *sha256;
 } apk_sign_keys[] = {
-	{EXPECTED_SIZE, EXPECTED_HASH}, // Official
+	{EXPECTED_SIZE_OFFICIAL, EXPECTED_HASH_OFFICIAL}, // Official
 	{EXPECTED_SIZE_RSUNTK, EXPECTED_HASH_RSUNTK}, // RKSU
 	{EXPECTED_SIZE_LUYANCI, EXPECTED_HASH_LUYANCI}, // luyanci fork
 	{EXPECTED_SIZE_SUKISU, EXPECTED_HASH_SUKISU}, // SUKISU
 	{EXPECTED_SIZE_YUKONG, EXPECTED_HASH_YUKONG}, // YuKongA/KernelSU
 	{EXPECTED_SIZE_ZAKO, EXPECTED_HASH_ZAKO}, // SUKISU Zako
 	{EXPECTED_SIZE_5EC1CFF, EXPECTED_HASH_5EC1CFF}, // MKSU
+#ifdef EXPECTED_SIZE
+	{EXPECTED_SIZE, EXPECTED_HASH}, // Custom
+#endif
 };
 
 static struct sdesc *init_sdesc(struct crypto_shash *alg)
