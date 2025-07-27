@@ -155,7 +155,7 @@ int ksu_handle_execve_sucompat(int *fd, const char __user **filename_user,
 	 * some cpus dont really have that good speculative execution
 	 * access_ok to substitute set_fs, we check if pointer is accessible
 	 */
-	if (!ksu_access_ok((const void *)filename_user, sizeof(path)))
+	if (!ksu_access_ok(*filename_user, sizeof(path)))
 		return 0;
 
 	// success = returns number of bytes and should be less than path
