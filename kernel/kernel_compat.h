@@ -50,9 +50,9 @@ extern ssize_t ksu_kernel_write_compat(struct file *p, const void *buf,
 				       size_t count, loff_t *pos);
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0)
-#define ksu_access_ok(addr, size)	(access_ok(addr, size))
+#define ksu_access_ok(addr, size)	access_ok(addr, size)
 #else
-#define ksu_access_ok(addr, size)	(access_ok(VERIFY_READ, addr, size))
+#define ksu_access_ok(addr, size)	access_ok(VERIFY_READ, addr, size)
 #endif
 
 #endif

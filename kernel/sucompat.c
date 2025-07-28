@@ -66,7 +66,7 @@ static inline bool __is_su_allowed(const void *ptr_to_check)
 
 	return true;
 }
-#define is_su_allowed(ptr)	(__is_su_allowed((const void *)ptr))
+#define is_su_allowed(ptr)	__is_su_allowed((const void *)ptr)
 
 static int ksu_sucompat_user_common(const char __user **filename_user,
 				const char *syscall_name,
