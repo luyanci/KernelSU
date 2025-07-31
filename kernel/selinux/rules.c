@@ -36,7 +36,7 @@ static struct policydb *get_policydb(void)
 	return db;
 }
 
-static DEFINE_MUTEX(apply_ksu_rules_mutex);
+static DEFINE_MUTEX(ksu_rules);
 void apply_kernelsu_rules()
 {
 	struct policydb *db;
@@ -45,7 +45,7 @@ void apply_kernelsu_rules()
 		pr_info("SELinux permissive or disabled, apply rules!\n");
 	}
 
-	mutex_lock(&apply_ksu_rules_mutex);
+	mutex_lock(&ksu_rules);
 	
 	db = get_policydb();
 
@@ -139,7 +139,7 @@ void apply_kernelsu_rules()
 	ksu_allow(db, "system_server", KERNEL_SU_DOMAIN, "process", "getpgid");
 	ksu_allow(db, "system_server", KERNEL_SU_DOMAIN, "process", "sigkill");
 
-	mutex_unlock(&apply_ksu_rules_mutex);
+	mutex_unlock(&ksu_rules);
 }
 
 #define MAX_SEPOL_LEN 128
@@ -223,9 +223,10 @@ static void reset_avc_cache()
 	selinux_xfrm_notify_policyload();
 }
 
-static DEFINE_MUTEX(ksu_handle_sepolicy_mutex);
 int handle_sepolicy(unsigned long arg3, void __user *arg4)
 {
+	struct policydb *db;
+
 	if (!arg4) {
 		return -1;
 	}
@@ -272,7 +273,7 @@ int handle_sepolicy(unsigned long arg3, void __user *arg4)
 
 	struct policydb *db;
 
-	mutex_lock(&ksu_handle_sepolicy_mutex);
+	mutex_lock(&ksu_rules);
 
 	db = get_policydb();
 
@@ -524,7 +525,7 @@ int handle_sepolicy(unsigned long arg3, void __user *arg4)
 	}
 
 exit:
-	mutex_unlock(&ksu_handle_sepolicy_mutex);
+	mutex_unlock(&ksu_rules);
 
 	// only allow and xallow needs to reset avc cache, but we cannot do that because
 	// we are in atomic context. so we just reset it every time.
