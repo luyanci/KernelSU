@@ -24,10 +24,10 @@ static struct policydb *get_policydb(void)
 // selinux_state does not exists before 4.19
 #ifdef KSU_COMPAT_USE_SELINUX_STATE
 #ifdef SELINUX_POLICY_INSTEAD_SELINUX_SS
-	struct selinux_policy *policy = rcu_dereference(selinux_state.policy);
+	struct selinux_policy *policy = selinux_state.policy;
 	db = &policy->policydb;
 #else
-	struct selinux_ss *ss = rcu_dereference(selinux_state.ss);
+	struct selinux_ss *ss = selinux_state.ss;
 	db = &ss->policydb;
 #endif
 #else
