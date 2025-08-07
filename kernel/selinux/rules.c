@@ -271,8 +271,6 @@ int handle_sepolicy(unsigned long arg3, void __user *arg4)
 		subcmd = data.subcmd;
 	}
 
-	struct policydb *db;
-
 	mutex_lock(&ksu_rules);
 
 	db = get_policydb();
