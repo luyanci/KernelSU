@@ -73,12 +73,9 @@ static int ksu_sucompat_user_common(const char __user **filename_user,
 				const bool escalate)
 {
 	char path[sizeof(su)]; // sizeof includes nullterm already!
-	if (ksu_strncpy_from_user_retry(path,
-		*filename_user, sizeof(path)) <= 0) {
-		return 0;
-	}
+	memset(path, 0, sizeof(path));
 
-	path[sizeof(path) - 1] = '\0';
+	ksu_strncpy_from_user_retry(path, *filename_user, sizeof(path));
 
 	if (memcmp(path, su, sizeof(su)))
 		return 0;
