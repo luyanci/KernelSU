@@ -118,11 +118,8 @@ static void setup_groups(struct root_profile *profile, struct cred *cred)
 	put_group_info(group_info);
 }
 
-static void disable_seccomp(void)
+static void disable_seccomp(struct task_struct *tsk)
 {
-	struct task_struct *tsk = get_current();
-
-	spin_lock_irq(&tsk->sighand->siglock);
 	assert_spin_locked(&tsk->sighand->siglock);
 
 	// disable seccomp
@@ -135,24 +132,18 @@ static void disable_seccomp(void)
 
 #ifdef CONFIG_SECCOMP
 	tsk->seccomp.mode = 0;
-	if (tsk->seccomp.filter == NULL) {
-		pr_warn("tsk->seccomp.filter is NULL already!\n");
-		goto out;
-	}
-
+	if (tsk->seccomp.filter) {
 	// TODO: Add kernel 6.11+ support
 	// 5.9+ have filter_count and use seccomp_filter_release
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
-	seccomp_filter_release(tsk);
-	atomic_set(&tsk->seccomp.filter_count, 0);
+		seccomp_filter_release(tsk);
+		atomic_set(&tsk->seccomp.filter_count, 0);
 #else
-	put_seccomp_filter(tsk);
-	tsk->seccomp.filter = NULL;
+		put_seccomp_filter(tsk);
+		tsk->seccomp.filter = NULL;
 #endif
+	}
 #endif
-
-out:
-	spin_unlock_irq(&tsk->sighand->siglock);
 }
 
 void escape_to_root(void)
@@ -203,7 +194,9 @@ void escape_to_root(void)
 	setup_groups(profile, newcreds);
 	commit_creds(newcreds);
 
-	disable_seccomp();
+	spin_lock_irq(&current->sighand->siglock);
+	disable_seccomp(current);
+	spin_unlock_irq(&current->sighand->siglock);
 	setup_selinux(profile->selinux_domain);
 }
 
