@@ -563,7 +563,9 @@ static bool should_umount(struct path *path)
 static void ksu_path_umount(const char *mnt, struct path *path, int flags)
 {
 	int ret = path_umount(path, flags);
+#ifdef CONFIG_KSU_DEBUG
 	pr_info("%s: path: %s ret: %d\n", __func__, mnt, ret);
+#endif
 }
 #define ksu_umount_mnt(mnt, path, flags)	(ksu_path_umount(mnt, path, flags))
 #else
@@ -590,7 +592,7 @@ static void ksu_sys_umount(const char *mnt, int flags)
 		ksu_sys_umount(mnt, flags);	\
 	})
 
-#endif 
+#endif
 
 static void try_umount(const char *mnt, bool check_mnt, int flags)
 {
