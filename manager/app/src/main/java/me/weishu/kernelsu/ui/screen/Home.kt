@@ -197,6 +197,7 @@ fun HomePager(
                     if (checkUpdate) {
                         UpdateCard()
                     }
+                    UnofficialCard()
                     InfoCard()
                     DonateCard()
                     LearnMoreCard()
@@ -638,6 +639,33 @@ fun DonateCard() {
             },
             onClick = {
                 uriHandler.openUri("https://patreon.com/weishu")
+            },
+            insideMargin = PaddingValues(18.dp)
+        )
+    }
+}
+
+@Composable
+fun UnofficialCard() {
+    val uriHandler = LocalUriHandler.current
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth(),
+    ) {
+        BasicComponent(
+            title = stringResource(R.string.home_unofficial_title),
+            summary = stringResource(R.string.home_unofficial_content),
+            rightActions = {
+                Icon(
+                    modifier = Modifier.size(28.dp),
+                    imageVector = Icons.Rounded.Link,
+                    tint = colorScheme.onSurface,
+                    contentDescription = null
+                )
+            },
+            onClick = {
+                uriHandler.openUri("https://github.com/rsuntk/KernelSU")
             },
             insideMargin = PaddingValues(18.dp)
         )
