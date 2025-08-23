@@ -38,6 +38,7 @@
     <string name="module_uninstall_failed">無法解除安裝：%s</string>
     <string name="module_version">版本</string>
     <string name="module_author">作者</string>
+    <string name="module_overlay_fs_not_available">OverlayFS 無法使用，模組無法正常運作！</string>
     <string name="refresh">重新整理</string>
     <string name="show_system_apps">顯示系統應用程式</string>
     <string name="hide_system_apps">隱藏系統應用程式</string>
@@ -120,4 +121,9 @@
     <string name="shrink_sparse_image_message">將模組所在的稀疏影像調整為實際大小。 請注意，這可能會導致模組工作異常，因此請僅在必要時使用（例如備份）</string>
     <string name="settings_uninstall">解除安裝</string>
     <string name="save_log">保存日志</string>
+    <string name="processing">處理中…</string>
+    <string name="refresh_pulling">下拉刷新</string>
+    <string name="refresh_release">鬆開刷新</string>
+    <string name="refresh_refresh">正在刷新…</string>
+    <string name="refresh_complete">刷新成功</string>
 </resources>

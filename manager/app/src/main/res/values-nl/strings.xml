@@ -38,6 +38,7 @@
     <string name="module_uninstall_failed">Mislukt om te verwijderen: %s</string>
     <string name="module_version">Versie</string>
     <string name="module_author">Auteur</string>
+    <string name="module_overlay_fs_not_available">Modules zijn niet beschikbaar omdat OverlayFS door de kernel is uitgeschakeld.</string>
     <string name="refresh">Vernieuwen</string>
     <string name="show_system_apps">Toon systeem apps</string>
     <string name="hide_system_apps">Verberg systeem apps</string>
@@ -77,14 +78,14 @@
     <string name="force_stop_app">Forceer stop</string>
     <string name="restart_app">Herstart</string>
     <string name="module_start_downloading">Begin met downloaden: %s</string>
-    <string name="failed_to_update_sepolicy">Kan SELinux-regels niet bijwerken voor: %s</string>
+    <string name="failed_to_update_sepolicy">Kan SELinux-regels niet bijwerken voor %s</string>
     <string name="require_kernel_version">De huidige KernelSU-versie %d is te laag voor de manager om goed te werken. Upgrade naar versie %d of hoger!</string>
     <string name="module_changelog">wijzigings logboek</string>
     <string name="settings_profile_template">App-profiel Sjabloon</string>
     <string name="app_profile_template_create">Maken sjabloon</string>
     <string name="app_profile_template_edit">Bewerkin sjabloon</string>
     <string name="app_profile_template_id">ID</string>
-    <string name="app_profile_template_id_invalid">Ongeldige sjabloon id</string>
+    <string name="app_profile_template_id_invalid">Ongeldige sjabloon ID</string>
     <string name="app_profile_template_name">Naam</string>
     <string name="app_profile_template_save">Redde</string>
     <string name="app_profile_template_view">Bekijken sjabloon</string>
@@ -125,10 +126,19 @@
     <string name="settings_restore_stock_image">Herstel stockafbeelding</string>
     <string name="settings_uninstall_temporary_message">Verwijder KernelSU tijdelijk en herstel het naar de oorspronkelijke staat na de volgende herstart.</string>
     <string name="settings_uninstall_permanent_message">Het verwijderen van KernelSU (Root en alle modules) volledig en permanent.</string>
-    <string name="settings_restore_stock_image_message">Herstel de standaard fabrieksimage (als er een back-up bestaat), die normaal gesproken vóór OTA wordt gebruikt. Als u KernelSU moet verwijderen, gebruikt u \'Permanent verwijderen\'.</string>
+    <string name="settings_restore_stock_image_message">Herstel de standaard fabrieksimage (als er een back-up bestaat), die normaal gesproken vóór OTA wordt gebruikt. Als u KernelSU moet verwijderen, gebruikt u permanent verwijderen.</string>
     <string name="flashing">Knipperen</string>
     <string name="save_log">Logboeken Opslaan</string>
     <string name="flash_success">Flash-succes</string>
     <string name="flash_failed">Flash is mislukt</string>
     <string name="selected_lkm">Geselecteerde LKM: %s</string>
+    <string name="action">Actie</string>
+    <string name="log_saved">Logs opgeslagen</string>
+    <string name="module_sort_enabled_first">Sorteren (eerst ingeschakeld)</string>
+    <string name="module_sort_action_first">Sorteren (actie eerst)</string>
+    <string name="module_install_prompt_with_name">De volgende modules worden geïnstalleerd: %1$s</string>
+    <string name="su_not_allowed">Kan geen Superuser-toegang verlenen aan %s</string>
+    <string name="settings_disable_su">su-compatibiliteit uitschakelen</string>
+    <string name="confirm">Bevestigen</string>
+    <string name="settings_disable_su_summary">Schakel tijdelijk de mogelijkheid uit voor een app om rootrechten te verkrijgen via de opdracht ⁠su (bestaande rootprocessen worden hierdoor niet beïnvloed).</string>
 </resources>

@@ -18,8 +18,8 @@
     <string name="selinux_status_permissive">Permissive</string>
     <string name="selinux_status_unknown">不明</string>
     <string name="superuser">スーパーユーザー</string>
-    <string name="module_failed_to_enable">モジュールの有効化に失敗: %s</string>
-    <string name="module_failed_to_disable">モジュールの無効化に失敗: %s</string>
+    <string name="module_failed_to_enable">モジュールの有効化に失敗しました: %s</string>
+    <string name="module_failed_to_disable">モジュールの無効化に失敗しました: %s</string>
     <string name="module_empty">モジュールがインストールされていません</string>
     <string name="module">モジュール</string>
     <string name="uninstall">アンインストール</string>
@@ -35,9 +35,10 @@
     <string name="about">アプリについて</string>
     <string name="module_uninstall_confirm">モジュール %s をアンインストールしますか？</string>
     <string name="module_uninstall_success">%s はアンインストールされました</string>
-    <string name="module_uninstall_failed">アンインストールに失敗: %s</string>
+    <string name="module_uninstall_failed">アンインストールに失敗しました: %s</string>
     <string name="module_version">バージョン</string>
     <string name="module_author">制作者</string>
+    <string name="module_overlay_fs_not_available">カーネルによって OverlayFS が無効になっているため、モジュールが利用できません!</string>
     <string name="refresh">更新</string>
     <string name="show_system_apps">システムアプリを表示</string>
     <string name="hide_system_apps">システムアプリを非表示</string>
@@ -72,7 +73,7 @@
     <string name="launch_app">起動</string>
     <string name="force_stop_app">強制停止</string>
     <string name="restart_app">再起動</string>
-    <string name="failed_to_update_sepolicy">SELinux ルールの更新に失敗しました: %s</string>
+    <string name="failed_to_update_sepolicy">SELinux ルールの更新に失敗しました %s</string>
     <string name="profile_capabilities">ケーパビリティ</string>
     <string name="module_downloading">モジュールをダウンロード中: %s</string>
     <string name="profile_umount_modules_summary">このオプションを有効にすると、KernelSU はこのアプリのモジュールによって変更されたファイルを復元できるようになります。</string>
@@ -87,7 +88,7 @@
     <string name="app_profile_import_from_clipboard">クリップボードからインポート</string>
     <string name="module_changelog_failed">変更ログの取得に失敗しました: %s</string>
     <string name="app_profile_template_name">名前</string>
-    <string name="app_profile_template_id_invalid">無効なテンプレート id</string>
+    <string name="app_profile_template_id_invalid">無効なテンプレート ID</string>
     <string name="app_profile_template_sync">オンラインテンプレートの同期</string>
     <string name="app_profile_template_create">テンプレートの作成</string>
     <string name="app_profile_template_readonly">読み取り専用</string>
@@ -131,4 +132,13 @@
     <string name="flash_failed">フラッシュ失敗</string>
     <string name="selected_lkm">選択された LKM: %s</string>
     <string name="save_log">ログを保存</string>
+    <string name="action">アクション</string>
+    <string name="log_saved">保存されたログ</string>
+    <string name="module_sort_enabled_first">並べ替え（最初に有効）</string>
+    <string name="module_sort_action_first">並べ替え（アクション優先）</string>
+    <string name="settings_disable_su_summary">⁠su コマンドを使用してアプリがルート権限を取得する機能を一時的に無効にします (既存のルート プロセスは影響を受けません)。</string>
+    <string name="su_not_allowed">%s にスーパーユーザーアクセスを許可できませんでした</string>
+    <string name="settings_disable_su">su互換性を無効にする</string>
+    <string name="module_install_prompt_with_name">次のモジュールがインストールされます: %1$s</string>
+    <string name="confirm">確認</string>
 </resources>

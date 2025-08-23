@@ -1,29 +1,24 @@
 package me.weishu.kernelsu.ui.screen
 
 import android.os.Environment
-import androidx.activity.compose.BackHandler
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.captionBar
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,9 +29,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -45,8 +44,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.component.KeyEventBlocker
-import me.weishu.kernelsu.ui.util.LocalSnackbarHost
 import me.weishu.kernelsu.ui.util.runModuleAction
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.icons.useful.Back
+import top.yukonga.miuix.kmp.icon.icons.useful.Save
+import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
+import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -56,16 +64,12 @@ import java.util.Locale
 @Destination<RootGraph>
 fun ExecuteModuleActionScreen(navigator: DestinationsNavigator, moduleId: String) {
     var text by rememberSaveable { mutableStateOf("") }
-    var tempText : String
+    var tempText: String
     val logContent = rememberSaveable { StringBuilder() }
-    val snackBarHost = LocalSnackbarHost.current
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
-    var isActionRunning by rememberSaveable { mutableStateOf(true) }
-
-    BackHandler(enabled = isActionRunning) {
-        // Disable back button if action is running
-    }
+    var actionResult: Boolean
 
     LaunchedEffect(Unit) {
         if (text.isNotEmpty()) {
@@ -86,81 +90,98 @@ fun ExecuteModuleActionScreen(navigator: DestinationsNavigator, moduleId: String
                 onStderr = {
                     logContent.append(it).append("\n")
                 }
-            )
+            ).let {
+                actionResult = it
+            }
         }
-        isActionRunning = false
+        if (actionResult) navigator.popBackStack()
     }
 
     Scaffold(
         topBar = {
             TopBar(
-                isActionRunning = isActionRunning,
+                onBack = dropUnlessResumed {
+                    navigator.popBackStack()
+                },
                 onSave = {
-                    if (!isActionRunning) {
-                        scope.launch {
-                            val format = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault())
-                            val date = format.format(Date())
-                            val file = File(
-                                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                                "KernelSU_module_action_log_${date}.log"
-                            )
-                            file.writeText(logContent.toString())
-                            snackBarHost.showSnackbar("Log saved to ${file.absolutePath}")
-                        }
+                    scope.launch {
+                        val format = SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault())
+                        val date = format.format(Date())
+                        val file = File(
+                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                            "KernelSU_module_action_log_${date}.log"
+                        )
+                        file.writeText(logContent.toString())
+                        Toast.makeText(context, "Log saved to ${file.absolutePath}", Toast.LENGTH_SHORT).show()
                     }
-                }
+                },
             )
         },
-        floatingActionButton = {
-            if (!isActionRunning) {
-                ExtendedFloatingActionButton(
-                    text = { Text(text = stringResource(R.string.close)) },
-                    icon = { Icon(Icons.Filled.Close, contentDescription = null) },
-                    onClick = {
-                        navigator.popBackStack()
-                    }
-                )
-            }
-        },
-        contentWindowInsets = WindowInsets.safeDrawing,
-        snackbarHost = { SnackbarHost(snackBarHost) }
+        popupHost = { },
+        contentWindowInsets = WindowInsets.systemBars.add(WindowInsets.displayCutout).only(WindowInsetsSides.Horizontal)
     ) { innerPadding ->
+        val layoutDirection = LocalLayoutDirection.current
         KeyEventBlocker {
             it.key == Key.VolumeDown || it.key == Key.VolumeUp
         }
         Column(
             modifier = Modifier
                 .fillMaxSize(1f)
-                .padding(innerPadding)
+                .scrollEndHaptic()
+                .padding(
+                    start = innerPadding.calculateStartPadding(layoutDirection),
+                    end = innerPadding.calculateStartPadding(layoutDirection),
+                )
                 .verticalScroll(scrollState),
         ) {
             LaunchedEffect(text) {
                 scrollState.animateScrollTo(scrollState.maxValue)
             }
+            Spacer(Modifier.height(innerPadding.calculateTopPadding()))
             Text(
                 modifier = Modifier.padding(8.dp),
                 text = text,
-                fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                fontSize = 12.sp,
                 fontFamily = FontFamily.Monospace,
-                lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
+            )
+            Spacer(
+                Modifier.height(
+                    12.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                            WindowInsets.captionBar.asPaddingValues().calculateBottomPadding()
+                )
             )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TopBar(isActionRunning: Boolean, onSave: () -> Unit = {}) {
-    TopAppBar(
-        title = { Text(stringResource(R.string.action)) },
-        actions = {
+private fun TopBar(
+    onBack: () -> Unit = {},
+    onSave: () -> Unit = {},
+) {
+    SmallTopAppBar(
+        title = stringResource(R.string.action),
+        navigationIcon = {
             IconButton(
-                onClick = onSave,
-                enabled = !isActionRunning
+                modifier = Modifier.padding(start = 16.dp),
+                onClick = onBack
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Save,
+                    imageVector = MiuixIcons.Useful.Back,
+                    contentDescription = null,
+                    tint = colorScheme.onBackground
+                )
+            }
+        },
+        actions = {
+            IconButton(
+                modifier = Modifier.padding(end = 16.dp),
+                onClick = onSave
+            ) {
+                Icon(
+                    imageVector = MiuixIcons.Useful.Save,
                     contentDescription = stringResource(id = R.string.save_log),
+                    tint = colorScheme.onBackground
                 )
             }
         }

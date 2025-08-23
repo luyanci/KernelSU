@@ -71,7 +71,6 @@ fun Uri.getFileName(context: Context): String? {
 fun createRootShell(globalMnt: Boolean = false): Shell {
     Shell.enableVerboseLogging = BuildConfig.DEBUG
     val builder = Shell.Builder.create()
-
     return try {
         if (globalMnt) {
             builder.build(getKsuDaemonPath(), "debug", "su", "-g")
@@ -145,13 +144,6 @@ fun uninstallModule(id: String): Boolean {
     val cmd = "module uninstall $id"
     val result = execKsud(cmd, true)
     Log.i(TAG, "uninstall module $id result: $result")
-    return result
-}
-
-fun restoreModule(id: String): Boolean {
-    val cmd = "module restore $id"
-    val result = execKsud(cmd, true)
-    Log.i(TAG, "restore module $id result: $result")
     return result
 }
 
@@ -237,6 +229,10 @@ fun uninstallPermanently(
     val magiskboot = File(ksuApp.applicationInfo.nativeLibraryDir, "libmagiskboot.so")
     val result = flashWithIO("${getKsuDaemonPath()} uninstall --magiskboot $magiskboot", onStdout, onStderr)
     return FlashResult(result)
+}
+
+suspend fun shrinkModules(): Boolean = withContext(Dispatchers.IO) {
+    execKsud("module shrink", true)
 }
 
 @Parcelize
@@ -354,27 +350,17 @@ suspend fun getSupportedKmis(): List<String> = withContext(Dispatchers.IO) {
     out.filter { it.isNotBlank() }.map { it.trim() }
 }
 
+fun overlayFsAvailable(): Boolean {
+    val shell = getRootShell()
+    // check /proc/filesystems
+    return ShellUtils.fastCmdResult(shell, "cat /proc/filesystems | grep overlay")
+}
+
 fun hasMagisk(): Boolean {
     val shell = getRootShell(true)
     val result = shell.newJob().add("which magisk").exec()
     Log.i(TAG, "has magisk: ${result.isSuccess}")
     return result.isSuccess
-}
-
-fun isGlobalNamespaceEnabled(): Boolean {
-    val shell = getRootShell()
-    val result =
-        ShellUtils.fastCmd(shell, "cat ${Natives.GLOBAL_NAMESPACE_FILE}")
-    Log.i(TAG, "is global namespace enabled: $result")
-    return result == "1"
-}
-
-fun setGlobalNamespaceEnabled(value: String) {
-    getRootShell().newJob()
-        .add("echo $value > ${Natives.GLOBAL_NAMESPACE_FILE}")
-        .submit { result ->
-            Log.i(TAG, "setGlobalNamespaceEnabled result: ${result.isSuccess} [${result.out}]")
-        }
 }
 
 fun isSepolicyValid(rules: String?): Boolean {

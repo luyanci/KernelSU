@@ -14,6 +14,7 @@
     <string name="reboot_download">In den Download-Modus neustarten</string>
     <string name="reboot_edl">In den EDL-Modus neustarten</string>
     <string name="module_author">Autor</string>
+    <string name="module_overlay_fs_not_available">Module sind nicht verfügbar, da OverlayFS vom Kernel deaktiviert ist.</string>
     <string name="about">Über KernelSU</string>
     <string name="module_magisk_conflict">Module sind aufgrund eines Konfliktes mit Magisk nicht verfügbar!</string>
     <string name="home_learn_kernelsu_url">https://kernelsu.org/guide/what-is-kernelsu.html</string>
@@ -62,7 +63,7 @@
     <string name="home_learn_kernelsu">KernelSU verstehen</string>
     <string name="safe_mode">Sicherer Modus</string>
     <string name="reboot_to_apply">Neustarten, damit Änderungen wirksam werden</string>
-    <string name="about_source_code">Schau dir den Quellcode an auf %1$s<br/>Trete unserem %2$s Kanal bei</string>
+    <string name="about_source_code"><![CDATA[Quellcode einsehen unter %1$s<br/>Unserem %2$s-Kanal beitreten]]></string>
     <string name="profile_name">Profilname</string>
     <string name="profile_namespace">Namespace einhängen</string>
     <string name="profile_groups">Gruppen</string>
@@ -130,4 +131,8 @@
     <string name="flash_failed">Schreiben fehlgeschlagen</string>
     <string name="selected_lkm">Wähle LKM: %s</string>
     <string name="shrink_sparse_image">Spärliches Bild minimieren</string>
+    <string name="action">Aktion</string>
+    <string name="log_saved">Protokolle gespeichert</string>
+    <string name="module_install_prompt_with_name">Folgende Module werden installiert: %1$s</string>
+    <string name="confirm">Bestätigen</string>
 </resources>
