@@ -23,7 +23,8 @@ object Natives {
     const val MINIMAL_SUPPORTED_KERNEL_LKM = 11648
 
     // 12040: Support disable sucompat mode
-    const val MINIMAL_SUPPORTED_SU_COMPAT = 12040
+    // + 31: Rissu's fork.
+    const val MINIMAL_SUPPORTED_SU_COMPAT = 12071
     const val KERNEL_SU_DOMAIN = "u:r:su:s0"
 
     const val ROOT_UID = 0
