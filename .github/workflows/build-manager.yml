@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/build-manager-common.yml'
       - '.github/workflows/ksud.yml'
+      - '.github/workflows/build-manager.yml'
       - 'manager/**'
       - 'kernel/**'
       - 'userspace/ksud/**'

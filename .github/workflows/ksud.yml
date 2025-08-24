@@ -19,7 +19,7 @@ jobs:
     env:
       release_tag: '14809502263'
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0
 
@@ -35,6 +35,9 @@ jobs:
       run: |
         cp lkm/*_kernelsu.ko ./userspace/ksud/bin/aarch64/
 
+    - name: Download artifacts
+      uses: actions/download-artifact@v5
+        
     - name: Setup rustup
       run: |
         rustup update stable
