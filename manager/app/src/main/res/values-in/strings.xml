@@ -120,7 +120,7 @@
     <string name="open">Buka</string>
     <string name="settings_check_update">Cek terbaru</string>
     <string name="settings_check_update_summary">Cek terbaru setiap membuka aplikasi</string>
-    <string name="settings_global_namespace_mode_summary">Gunakan universal namespace ke semua root sesi</string>
+    <string name="settings_global_namespace_mode_summary">Gunakan universal namespace ke semua sesi root.</string>
     <string name="settings_global_namespace_mode">Mode universal namespace</string>
     <string name="shrink_sparse_image">Minimalkan ukuran sparse image</string>
     <string name="shrink_sparse_image_message">Mengembalikan ukuran sparse image, lokasi modul disimpan, ke ukuran sebenarnya. Dapat menyebabkan modul bekerja abnormal, gunakan saat dibutuhkan saja (mis. untuk pencadangan).</string>
@@ -138,6 +138,8 @@
     <string name="save_log">Simpan Log</string>
     <string name="action">Action</string>
     <string name="log_saved">Log disimpan</string>
+    <string name="settings_disable_su">Nonaktifkan perintah \'su\'</string>
+    <string name="settings_disable_su_summary">Nonaktifkan sementara perintah \'su\' yang digunakan oleh aplikasi untuk mendapat akses superuser via perintah (proses root yang sudah ada tidak akan terpengaruh).</string>
     <string name="module_sort_enabled_first">Urut (Diaktifkan terlebih dahulu)</string>
     <string name="module_sort_action_first">Urut (Tindakan pertama)</string>
 </resources>

@@ -227,7 +227,6 @@ fun SettingScreen(navigator: DestinationsNavigator) {
                             )
                         }
 
-
                         var enableWebDebugging by rememberSaveable {
                             mutableStateOf(
                                 prefs.getBoolean("enable_web_debugging", false)
@@ -279,31 +278,31 @@ fun SettingScreen(navigator: DestinationsNavigator) {
                 }
 
                 KsuIsValid {
-                    Card(
-                        modifier = Modifier
-                            .padding(top = 12.dp)
-                            .fillMaxWidth(),
-                    ) {
-                        val lkmMode = Natives.version >= Natives.MINIMAL_SUPPORTED_KERNEL_LKM && Natives.isLkmMode
-                        if (lkmMode) {
-                            val uninstall = stringResource(id = R.string.settings_uninstall)
-                            SuperArrow(
-                                title = uninstall,
-                                leftAction = {
-                                    Icon(
-                                        Icons.Rounded.Delete,
-                                        modifier = Modifier.padding(end = 16.dp),
-                                        contentDescription = uninstall,
-                                        tint = colorScheme.onBackground,
-                                    )
-                                },
-                                onClick = {
-                                    showUninstallDialog.value = true
-                                    uninstallDialog
-                                }
-                            )
-                        }
-                    }
+                	val lkmMode = Natives.version >= Natives.MINIMAL_SUPPORTED_KERNEL_LKM && Natives.isLkmMode
+                	if (lkmMode) {
+				    Card(
+				        modifier = Modifier
+				            .padding(top = 12.dp)
+				            .fillMaxWidth(),
+				    ) {
+				            val uninstall = stringResource(id = R.string.settings_uninstall)
+				            SuperArrow(
+				                title = uninstall,
+				                leftAction = {
+				                    Icon(
+				                        Icons.Rounded.Delete,
+				                        modifier = Modifier.padding(end = 16.dp),
+				                        contentDescription = uninstall,
+				                        tint = colorScheme.onBackground,
+				                    )
+				                },
+				                onClick = {
+				                    showUninstallDialog.value = true
+				                    uninstallDialog
+				                }
+				            )
+				   }
+                	}
                 }
 
                 Card(
