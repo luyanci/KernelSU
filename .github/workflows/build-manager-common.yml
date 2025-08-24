@@ -8,21 +8,7 @@ on:
         default: false
 
 jobs:
-  build-ksud:
-    strategy:
-      matrix:
-        include:
-          - target: aarch64-linux-android
-            os: ubuntu-latest
-          - target: armv7-linux-androideabi
-            os: ubuntu-latest
-    uses: ./.github/workflows/ksud.yml
-    with:
-      target: ${{ matrix.target }}
-      os: ${{ matrix.os }}
-
   build-manager-common:
-    needs: build-ksud
     environment: signing
     runs-on: ubuntu-latest
     defaults:
@@ -42,8 +28,18 @@ jobs:
           echo "- Randomizing me.weishu.kernelsu ..."
           chmod +x randomizer
           ./randomizer
-          echo "IS_SPOOFED=true" >> $GITHUB_OUTPUT
           echo "- Done"
+
+      - name: Get artifact name
+        id: real_artifact_name
+        run: |
+          if [ "${{ inputs.spoofed }}" == "true" ]; then
+            echo "MGR_ARTIFACT_NAME=manager-spoofed" >> $GITHUB_OUTPUT
+            echo "MPS_ARTIFACT_NAME=mappings-spoofed" >> $GITHUB_OUTPUT
+          else
+            echo "MGR_ARTIFACT_NAME=manager" >> $GITHUB_OUTPUT
+            echo "MPS_ARTIFACT_NAME=mappings" >> $GITHUB_OUTPUT
+          fi
 
       - name: Setup need_upload
         id: need_upload
@@ -121,14 +117,14 @@ jobs:
         uses: actions/upload-artifact@v4
         if: ${{ ( github.event_name != 'pull_request' && github.ref == 'refs/heads/main' ) || github.ref_type == 'tag' }}
         with:
-          name: manager
+          name: ${{ steps.real_artifact_name.outputs.MGR_ARTIFACT_NAME }}
           path: manager/app/build/outputs/apk/release/*.apk
 
       - name: Upload mappings
         uses: actions/upload-artifact@v4
         if: ${{ ( github.event_name != 'pull_request' && github.ref == 'refs/heads/main' ) || github.ref_type == 'tag' }}
         with:
-          name: "mappings"
+          name: ${{ steps.real_artifact_name.outputs.MPS_ARTIFACT_NAME }}
           path: "manager/app/build/outputs/mapping/release/"
 
       - name: Upload to telegram
@@ -142,7 +138,7 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
-            if [ "${{ steps.spoofed_state.outputs.IS_SPOOFED }}" == "true" ]; then
+            if [ "${{ inputs.spoofed }}" == "true" ]; then
               export TITLE="Spoofed Manager"
             else
               export TITLE="Manager"
