@@ -28,6 +28,7 @@ import androidx.compose.material.icons.rounded.FolderDelete
 import androidx.compose.material.icons.rounded.RemoveModerator
 import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.Update
+import androidx.compose.material.icons.filled.Engineering
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,7 +57,8 @@ import me.weishu.kernelsu.ui.component.SendLogDialog
 import me.weishu.kernelsu.ui.component.UninstallDialog
 import me.weishu.kernelsu.ui.component.rememberConfirmDialog
 import me.weishu.kernelsu.ui.component.rememberLoadingDialog
-import me.weishu.kernelsu.ui.util.shrinkModules
+import me.weishu.kernelsu.ui.util.isGlobalNamespaceEnabled
+import me.weishu.kernelsu.ui.util.setGlobalNamespaceEnabled
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
@@ -81,6 +83,8 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 @Destination<RootGraph>
 fun SettingScreen(navigator: DestinationsNavigator) {
     val scrollBehavior = MiuixScrollBehavior()
+    var isGlobalNamespaceEnabled by rememberSaveable { mutableStateOf(false) }
+    isGlobalNamespaceEnabled = isGlobalNamespaceEnabled()
 
     Scaffold(
         topBar = {
@@ -197,6 +201,7 @@ fun SettingScreen(navigator: DestinationsNavigator) {
                                 }
                             }
                         )
+
                         if (Natives.version >= Natives.MINIMAL_SUPPORTED_SU_COMPAT) {
                             var isSuDisabled by rememberSaveable {
                                 mutableStateOf(!Natives.isSuEnabled())
@@ -208,7 +213,7 @@ fun SettingScreen(navigator: DestinationsNavigator) {
                                     Icon(
                                         Icons.Rounded.RemoveModerator,
                                         modifier = Modifier.padding(end = 16.dp),
-                                        contentDescription = stringResource(id = R.string.settings_disable_su),
+                                        contentDescription = stringResource(id = R.string.settings_disable_su_summary),
                                         tint = colorScheme.onBackground
                                     )
                                 },
@@ -230,6 +235,30 @@ fun SettingScreen(navigator: DestinationsNavigator) {
                         }
 
                         SuperSwitch(
+                            title = stringResource(id = R.string.settings_global_namespace_mode),
+                            summary = stringResource(id = R.string.settings_global_namespace_mode_summary),
+                            leftAction = {
+                                Icon(
+                                    Icons.Filled.Engineering,
+                                    modifier = Modifier.padding(end = 16.dp),
+                                    contentDescription = stringResource(id = R.string.settings_global_namespace_mode),
+                                    tint = colorScheme.onBackground
+                                )
+                            },
+                            checked = isGlobalNamespaceEnabled,
+                            onCheckedChange = {
+                            	setGlobalNamespaceEnabled(
+                            		if (isGlobalNamespaceEnabled) {
+                            			"0"
+                            		} else {
+                            			"1"
+                            		}
+                            	)
+                                isGlobalNamespaceEnabled = it
+                            }
+                        )
+
+                        SuperSwitch(
                             title = stringResource(id = R.string.enable_web_debugging),
                             summary = stringResource(id = R.string.enable_web_debugging_summary),
                             leftAction = {
@@ -249,35 +278,12 @@ fun SettingScreen(navigator: DestinationsNavigator) {
                     }
                 }
 
-                val shrink = stringResource(id = R.string.shrink_sparse_image)
                 KsuIsValid {
                     Card(
                         modifier = Modifier
                             .padding(top = 12.dp)
                             .fillMaxWidth(),
                     ) {
-                        SuperArrow(
-                            title = shrink,
-                            leftAction = {
-                                Icon(
-                                    Icons.Rounded.Compress,
-                                    modifier = Modifier.padding(end = 16.dp),
-                                    contentDescription = shrink,
-                                    tint = colorScheme.onBackground
-                                )
-                            },
-                            onClick = {
-                                scope.launch {
-                                    val result = shrinkDialog.awaitConfirm(title = shrink)
-                                    if (result == ConfirmResult.Confirmed) {
-                                        loadingDialog.withLoading {
-                                            shrinkModules()
-                                        }
-                                    }
-                                }
-                            },
-                        )
-
                         val lkmMode = Natives.version >= Natives.MINIMAL_SUPPORTED_KERNEL_LKM && Natives.isLkmMode
                         if (lkmMode) {
                             val uninstall = stringResource(id = R.string.settings_uninstall)
