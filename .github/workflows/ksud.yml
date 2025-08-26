@@ -17,7 +17,7 @@ jobs:
   build:
     runs-on: ${{ inputs.os }}
     env:
-      release_tag: '14809502263'
+      release_tag: '17234070854'
     steps:
     - uses: actions/checkout@v5
       with:
@@ -34,9 +34,6 @@ jobs:
     - name: Prepare LKM files
       run: |
         cp lkm/*_kernelsu.ko ./userspace/ksud/bin/aarch64/
-
-    - name: Download artifacts
-      uses: actions/download-artifact@v5
         
     - name: Setup rustup
       run: |
