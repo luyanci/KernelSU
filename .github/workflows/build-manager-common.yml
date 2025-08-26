@@ -53,7 +53,7 @@ jobs:
       - name: set topicid
         id: set_topicid
         run: |
-          if [ "${{ steps.spoofed_state.outputs.IS_SPOOFED}}" == "true" ]; then
+          if [ "${{ inputs.spoofed }}" == "true" ]; then
             echo "TOPICID=857" >> $GITHUB_OUTPUT
           else
             echo "TOPICID=${{ secrets.MESSAGE_THREAD_ID }}" >> $GITHUB_OUTPUT
