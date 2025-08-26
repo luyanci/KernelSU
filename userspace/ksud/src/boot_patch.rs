@@ -624,6 +624,7 @@ fn do_patch(
                 if status.is_ok() {
                     do_vendor_ramdisk_cpio_cmd(&magiskboot, workdir, "mv init init.real")?;
                 }
+            }
         } else {
             // kernelsu.ko is not exist, backup init if necessary
             let status = do_cpio_cmd(&magiskboot, workdir, "exists init");
