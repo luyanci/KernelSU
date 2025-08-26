@@ -248,7 +248,8 @@ pub fn restore(
         .arg(bootimage.display().to_string())
         .status()?;
     ensure!(status.success(), "magiskboot unpack failed");
-
+    
+    let no_ramdisk = !workdir.join("ramdisk.cpio").exists();
     let is_kernelsu_patched = is_kernelsu_patched(&magiskboot, workdir)?;
     ensure!(is_kernelsu_patched, "boot image is not patched by KernelSU");
 
@@ -282,16 +283,30 @@ pub fn restore(
     }
 
     if new_boot.is_none() {
-        // remove kernelsu.ko
-        do_cpio_cmd(&magiskboot, workdir, "rm kernelsu.ko")?;
-
+        if no_ramdisk {
+            // vendor ramdisk restore
+            do_vendor_cpio_cmd(&magiskboot, workdir, "rm kernelsu.ko")?;
+ 
         // if init.real exists, restore it
-        let status = do_cpio_cmd(&magiskboot, workdir, "exists init.real").is_ok();
-        if status {
-            do_cpio_cmd(&magiskboot, workdir, "mv init.real init")?;
+        let status = do_vendor_cpio_cmd(&magiskboot, workdir, "exists init.real").is_ok();
+            if status {
+                do_vendor_cpio_cmd(&magiskboot, workdir, "mv init.real init")?;
+            } else {
+                let vendor_ramdisk = workdir.join("vendor_ramdisk").join("init_boot.cpio");
+                std::fs::remove_file(vendor_ramdisk)?;
+            }
         } else {
-            let ramdisk = workdir.join("ramdisk.cpio");
-            std::fs::remove_file(ramdisk)?;
+            // remove kernelsu.ko
+            do_cpio_cmd(&magiskboot, workdir, "rm kernelsu.ko")?;
+
+            // if init.real exists, restore it
+            let status = do_cpio_cmd(&magiskboot, workdir, "exists init.real").is_ok();
+            if status {
+                do_cpio_cmd(&magiskboot, workdir, "mv init.real init")?;
+            } else {
+                let ramdisk = workdir.join("ramdisk.cpio");
+                std::fs::remove_file(ramdisk)?;
+            }
         }
 
         println!("- Repacking boot image");
@@ -682,8 +697,12 @@ fn find_boot_image(
 
         let init_boot_exist =
             Path::new(&format!("/dev/block/by-name/init_boot{slot_suffix}")).exists();
+        let vendor_boot_exist =
+            Path::new(&format!("/dev/block/by-name/vendor_boot{slot_suffix}")).exists();
         let boot_partition = if !is_replace_kernel && init_boot_exist && !skip_init {
             format!("/dev/block/by-name/init_boot{slot_suffix}")
+        } else if !is_replace_kernel && vendor_boot_exist && !skip_init {
+            format!("/dev/block/by-name/vendor_boot{slot_suffix}")
         } else {
             format!("/dev/block/by-name/boot{slot_suffix}")
         };
