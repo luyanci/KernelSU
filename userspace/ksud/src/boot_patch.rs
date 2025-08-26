@@ -193,6 +193,22 @@ fn is_magisk_patched(magiskboot: &Path, workdir: &Path) -> Result<bool> {
     // 0: stock, 1: magisk
     Ok(status.code() == Some(1))
 }
+fn is_magisk_patched_vendor(magiskboot: &Path, workdir: &Path) -> Result<bool> {
+    let vendor_ramdisk_cpio = workdir.join("vendor_ramdisk").join("init_boot.cpio");
+    let status = Command::new(magiskboot)
+        .current_dir(workdir)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .args([
+            "cpio",
+            vendor_ramdisk_cpio.to_str().unwrap(),
+            "test",
+        ])
+        .status()?;
+
+    // 0: stock, 1: magisk
+    Ok(status.code() == Some(1))
+}
 
 fn is_kernelsu_patched(magiskboot: &Path, workdir: &Path) -> Result<bool> {
     let status = Command::new(magiskboot)
@@ -200,6 +216,22 @@ fn is_kernelsu_patched(magiskboot: &Path, workdir: &Path) -> Result<bool> {
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .args(["cpio", "ramdisk.cpio", "exists kernelsu.ko"])
+        .status()?;
+
+    Ok(status.success())
+}
+
+fn is_kernelsu_patched_vendor(magiskboot: &Path, workdir: &Path) -> Result<bool> {
+    let vendor_ramdisk_cpio = workdir.join("vendor_ramdisk").join("init_boot.cpio");
+    let status = Command::new(magiskboot)
+        .current_dir(workdir)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .args([
+            "cpio",
+            vendor_ramdisk_cpio.to_str().unwrap(),
+            "exists kernelsu.ko",
+        ])
         .status()?;
 
     Ok(status.success())
@@ -251,7 +283,8 @@ pub fn restore(
     
     let no_ramdisk = !workdir.join("ramdisk.cpio").exists();
     let is_kernelsu_patched = is_kernelsu_patched(&magiskboot, workdir)?;
-    ensure!(is_kernelsu_patched, "boot image is not patched by KernelSU");
+    let is_kernelsu_patched_vendor = is_kernelsu_patched_vendor(&magiskboot, workdir)?;
+    ensure!(is_kernelsu_patched || is_kernelsu_patched_vendor, "boot image is not patched by KernelSU");
 
     let mut new_boot = None;
     let mut from_backup = false;
@@ -485,16 +518,18 @@ fn do_patch(
 
     let no_ramdisk = !workdir.join("ramdisk.cpio").exists();
     let is_magisk_patched = is_magisk_patched(&magiskboot, workdir)?;
+    let is_magisk_patched_vendor = is_magisk_patched_vendor(&magiskboot, workdir)?;
     ensure!(
-        no_ramdisk || !is_magisk_patched,
+        no_ramdisk || !is_magisk_patched || !is_magisk_patched_vendor,
         "Cannot work with Magisk patched image"
     );
 
     println!("- Adding KernelSU LKM");
     let is_kernelsu_patched = is_kernelsu_patched(&magiskboot, workdir)?;
+    let is_kernelsu_patched_vendor = is_kernelsu_patched_vendor(&magiskboot, workdir)?;
 
     let mut need_backup = false;
-    if !is_kernelsu_patched {
+    if !is_kernelsu_patched || !is_kernelsu_patched_vendor {
         if no_ramdisk {
             // vendor ramdisk patching
             let status = do_vendor_cpio_cmd(&magiskboot, workdir, "exists init");
