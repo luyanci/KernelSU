@@ -148,15 +148,16 @@ static void disable_seccomp(struct task_struct *tsk)
 
 void escape_to_root(void)
 {
-	struct cred *newcreds = prepare_creds();
-	if (newcreds == NULL) {
-		pr_err("%s: failed to allocate new cred.\n", __func__);
+	struct cred *newcreds;
+
+	if (current_euid().val == 0) {
+		pr_warn("Already root, don't escape!\n");
 		return;
 	}
-
-	if (newcreds->euid.val == 0) {
-		pr_warn("Already root, don't escape!\n");
-		abort_creds(newcreds);
+	
+	newcreds = prepare_creds();
+	if (newcreds == NULL) {
+		pr_err("%s: failed to allocate new cred.\n", __func__);
 		return;
 	}
 
