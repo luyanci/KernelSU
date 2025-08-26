@@ -167,6 +167,21 @@ fn do_cpio_cmd(magiskboot: &Path, workdir: &Path, cmd: &str) -> Result<()> {
     Ok(())
 }
 
+fn do_vendor_cpio_cmd(magiskboot: &Path, workdir: &Path, cmd: &str) -> Result<()> {
+    let vendor_ramdisk_cpio = workdir.join("vendor_ramdisk").join("init_boot.cpio");
+    let status = Command::new(magiskboot)
+        .current_dir(workdir)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .arg("cpio")
+        .arg(vendor_ramdisk_cpio)
+        .arg(cmd)
+        .status()?;
+
+    ensure!(status.success(), "magiskboot cpio {} failed", cmd);
+    Ok(())
+}
+
 fn is_magisk_patched(magiskboot: &Path, workdir: &Path) -> Result<bool> {
     let status = Command::new(magiskboot)
         .current_dir(workdir)
@@ -465,17 +480,29 @@ fn do_patch(
 
     let mut need_backup = false;
     if !is_kernelsu_patched {
-        // kernelsu.ko is not exist, backup init if necessary
-        let status = do_cpio_cmd(&magiskboot, workdir, "exists init");
-        if status.is_ok() {
-            do_cpio_cmd(&magiskboot, workdir, "mv init init.real")?;
+        if no_ramdisk {
+            // vendor ramdisk patching
+            let status = do_vendor_cpio_cmd(&magiskboot, workdir, "exists init");
+            if status.is_ok() {
+                do_vendor_cpio_cmd(&magiskboot, workdir, "mv init init.real")?;
+            }
+        } else {
+            // kernelsu.ko is not exist, backup init if necessary
+            let status = do_cpio_cmd(&magiskboot, workdir, "exists init");
+            if status.is_ok() {
+                do_cpio_cmd(&magiskboot, workdir, "mv init init.real")?;
+            }
+            need_backup = flash;
         }
-
-        need_backup = flash;
     }
 
-    do_cpio_cmd(&magiskboot, workdir, "add 0755 init init")?;
-    do_cpio_cmd(&magiskboot, workdir, "add 0755 kernelsu.ko kernelsu.ko")?;
+    if no_ramdisk {
+        do_vendor_cpio_cmd(&magiskboot, workdir, "add 0755 init init")?;
+        do_vendor_cpio_cmd(&magiskboot, workdir, "add 0755 kernelsu.ko kernelsu.ko")?;
+    } else {
+        do_cpio_cmd(&magiskboot, workdir, "add 0755 init init")?;
+        do_cpio_cmd(&magiskboot, workdir, "add 0755 kernelsu.ko kernelsu.ko")?;
+    }
 
     #[cfg(target_os = "android")]
     if need_backup {
