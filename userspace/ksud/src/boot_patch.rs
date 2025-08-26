@@ -238,21 +238,6 @@ fn is_magisk_patched_vendor_ramdisk(magiskboot: &Path, workdir: &Path) -> Result
     Ok(status.code() == Some(1))
 }
 
-fn is_kernelsu_patched_vendor_ramdisk(magiskboot: &Path, workdir: &Path) -> Result<bool> {
-    let vendor_ramdisk_cpio = workdir.join("vendor_ramdisk").join("ramdisk.cpio");
-    let status = Command::new(magiskboot)
-        .current_dir(workdir)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .args([
-            "cpio",
-            vendor_ramdisk_cpio.to_str().unwrap(),
-            "exists kernelsu.ko",
-        ])
-        .status()?;
-
-    Ok(status.success())
-}
 
 fn is_kernelsu_patched(magiskboot: &Path, workdir: &Path) -> Result<bool> {
     let status = Command::new(magiskboot)
@@ -267,6 +252,22 @@ fn is_kernelsu_patched(magiskboot: &Path, workdir: &Path) -> Result<bool> {
 
 fn is_kernelsu_patched_vendor_init_boot(magiskboot: &Path, workdir: &Path) -> Result<bool> {
     let vendor_ramdisk_cpio = workdir.join("vendor_ramdisk").join("init_boot.cpio");
+    let status = Command::new(magiskboot)
+        .current_dir(workdir)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .args([
+            "cpio",
+            vendor_ramdisk_cpio.to_str().unwrap(),
+            "exists kernelsu.ko",
+        ])
+        .status()?;
+
+    Ok(status.success())
+}
+
+fn is_kernelsu_patched_vendor_ramdisk(magiskboot: &Path, workdir: &Path) -> Result<bool> {
+    let vendor_ramdisk_cpio = workdir.join("vendor_ramdisk").join("ramdisk.cpio");
     let status = Command::new(magiskboot)
         .current_dir(workdir)
         .stdout(Stdio::null())
@@ -335,7 +336,7 @@ pub fn restore(
         .join("ramdisk.cpio")
         .exists();
     let is_kernelsu_patched = is_kernelsu_patched(&magiskboot, workdir)?;
-    let is_kernelsu_patched_vendor_init_boot = is_kernelsu_patched_vendor(&magiskboot, workdir)?;
+    let is_kernelsu_patched_vendor_init_boot = is_kernelsu_patched_vendor_init_boot(&magiskboot, workdir)?;
     let is_kernelsu_patched_vendor_ramdisk = is_kernelsu_patched_vendor_ramdisk(&magiskboot, workdir)?;
     ensure!(is_kernelsu_patched || is_kernelsu_patched_vendor_init_boot || is_kernelsu_patched_vendor_ramdisk, "boot image is not patched by KernelSU");
 
