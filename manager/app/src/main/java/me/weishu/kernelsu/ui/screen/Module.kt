@@ -659,7 +659,7 @@ fun ModuleItem(
                 )
             }
             Switch(
-                modifier = Modifier,
+                enabled = !module.update,
                 checked = module.enabled,
                 onCheckedChange = onCheckChanged
             )
