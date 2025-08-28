@@ -28,7 +28,7 @@
 static const char su[] = SU_PATH;
 static const char ksud_path[] = KSUD_PATH;
 
-extern void escape_to_root();
+extern void escape_to_root(void);
 
 bool ksu_sucompat_hook_state __read_mostly = true;
 
@@ -258,7 +258,7 @@ static void destroy_kprobe(struct kprobe **kp_ptr)
 #endif
 
 // sucompat: permited process can execute 'su' to gain root access.
-void ksu_sucompat_init()
+void ksu_sucompat_init(void)
 {
 #ifdef CONFIG_KSU_KPROBES_HOOK
 	su_kps[0] = init_kprobe(SYS_EXECVE_SYMBOL, execve_handler_pre);
@@ -273,7 +273,7 @@ void ksu_sucompat_init()
 #endif
 }
 
-void ksu_sucompat_exit()
+void ksu_sucompat_exit(void)
 {
 #ifdef CONFIG_KSU_KPROBES_HOOK
 	int i;
