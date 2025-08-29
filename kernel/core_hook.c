@@ -587,10 +587,12 @@ static int ksu_sys_umount(const char *mnt, int flags)
 	return ret;
 }
 
-#define ksu_umount_mnt(mnt, __unused, flags)	\
-	({					\
-		path_put(__unused);		\
-		ksu_sys_umount(mnt, flags);	\
+#define ksu_umount_mnt(mnt, __unused, flags)		\
+	({						\
+		int ret;				\
+		path_put(__unused);			\
+		ret = ksu_sys_umount(mnt, flags);	\
+		ret;					\
 	})
 
 #endif
