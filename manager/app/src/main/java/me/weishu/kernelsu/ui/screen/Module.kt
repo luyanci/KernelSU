@@ -41,6 +41,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.Download
@@ -97,6 +98,7 @@ import me.weishu.kernelsu.ui.util.getFileName
 import me.weishu.kernelsu.ui.util.hasMagisk
 import me.weishu.kernelsu.ui.util.toggleModule
 import me.weishu.kernelsu.ui.util.uninstallModule
+import me.weishu.kernelsu.ui.util.restoreModule
 import me.weishu.kernelsu.ui.viewmodel.ModuleViewModel
 import me.weishu.kernelsu.ui.webui.WebUIActivity
 import top.yukonga.miuix.kmp.basic.Card
@@ -245,26 +247,36 @@ fun ModulePager(
         }
     }
 
-    suspend fun onModuleUninstall(module: ModuleViewModel.ModuleInfo) {
-        val confirmResult = confirmDialog.awaitConfirm(
-            moduleStr,
-            content = moduleUninstallConfirm.format(module.name),
-            confirm = uninstall,
-            dismiss = cancel
-        )
-        if (confirmResult != ConfirmResult.Confirmed) {
-            return
+    suspend fun onModuleUninstallClicked(module: ModuleViewModel.ModuleInfo) {
+        val isUnistall = !module.remove
+        if (isUnistall) {
+            val confirmResult = confirmDialog.awaitConfirm(
+                moduleStr,
+                content = moduleUninstallConfirm.format(module.name),
+                confirm = uninstall,
+                dismiss = cancel
+                )
+            if (confirmResult != ConfirmResult.Confirmed) {
+                return
+            }
         }
+
+
 
         val success = loadingDialog.withLoading {
             withContext(Dispatchers.IO) {
-                uninstallModule(module.id)
+                if (isUnistall) {
+                    uninstallModule(module.id)
+                } else {
+                    restoreModule(module.id)
+                }
             }
         }
 
         if (success) {
             viewModel.fetchModuleList()
         }
+        if (!isUnistall) return
         val message = if (success) {
             successUninstall.format(module.name)
         } else {
@@ -495,9 +507,9 @@ fun ModulePager(
                             navigator = navigator,
                             module = module,
                             updateUrl = updatedModule.first,
-                            onUninstall = {
+                            onUninstallClicked = {
                                 scope.launch {
-                                    onModuleUninstall(module)
+                                    onModuleUninstallClicked(module)
                                 }
                             },
                             onCheckChanged = {
@@ -577,9 +589,9 @@ fun ModulePager(
                         onClickModule = { id, name, hasWebUi ->
                             onModuleClick(id, name, hasWebUi)
                         },
-                        onModuleUninstall = { module ->
+                        onModuleUninstallClicked = { module ->
                             scope.launch {
-                                onModuleUninstall(module)
+                                onModuleUninstallClicked(module)
                             }
                         },
                         onModuleToggle = { module ->
@@ -620,7 +632,7 @@ private fun ModuleList(
     modifier: Modifier = Modifier,
     onInstallModule: (Uri) -> Unit,
     onClickModule: (id: String, name: String, hasWebUi: Boolean) -> Unit,
-    onModuleUninstall: suspend (ModuleViewModel.ModuleInfo) -> Unit,
+    onModuleUninstallClicked: suspend (ModuleViewModel.ModuleInfo) -> Unit,
     onModuleToggle: suspend (ModuleViewModel.ModuleInfo) -> Unit,
     onModuleUpdate: suspend (ModuleViewModel.ModuleInfo, String, String, String) -> Unit,
     context: Context,
@@ -694,9 +706,9 @@ private fun ModuleList(
                             navigator = navigator,
                             module = module,
                             updateUrl = updatedModule.first,
-                            onUninstall = {
+                            onUninstallClicked = {
                                 scope.launch {
-                                    onModuleUninstall(module)
+                                    onModuleUninstallClicked(module)
                                 }
                             },
                             onCheckChanged = {
@@ -736,7 +748,7 @@ fun ModuleItem(
     navigator: DestinationsNavigator,
     module: ModuleViewModel.ModuleInfo,
     updateUrl: String,
-    onUninstall: (ModuleViewModel.ModuleInfo) -> Unit,
+    onUninstallClicked: (ModuleViewModel.ModuleInfo) -> Unit,
     onCheckChanged: (Boolean) -> Unit,
     onUpdate: (ModuleViewModel.ModuleInfo) -> Unit,
     onClick: (ModuleViewModel.ModuleInfo) -> Unit
@@ -892,10 +904,9 @@ fun ModuleItem(
             }
 
             IconButton(
-                enabled = !module.remove,
                 minHeight = 35.dp,
                 minWidth = 35.dp,
-                onClick = { onUninstall(module) },
+                onClick = { onUninstallClicked(module) },
                 backgroundColor = colorScheme.secondaryContainer.copy(alpha = 0.8f),
             ) {
                 Row(
@@ -909,17 +920,28 @@ fun ModuleItem(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Icon(
-                        modifier = Modifier
+                    if (!module.remove) {
+                        Icon(
+                            modifier = Modifier
                             .size(20.dp),
-                        imageVector = Icons.Outlined.Delete,
-                        tint = colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
-                        contentDescription = null
-                    )
+                             imageVector = Icons.Outlined.Delete,
+                             tint = colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
+                             contentDescription = null
+                        )
+                    } else {
+                        Icon(
+                            modifier = Modifier
+                            .size(20.dp),
+                             imageVector = Icons.Outlined.Refresh,
+                             tint = colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
+                             contentDescription = null
+                        )
+                    }
+
                     if (updateUrl.isEmpty()) {
                         Text(
                             modifier = Modifier.padding(end = 3.dp),
-                            text = stringResource(R.string.uninstall),
+                            text = stringResource(if (!module.remove) R.string.uninstall else R.string.restore),
                             color = colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.7f else 0.9f),
                             fontWeight = FontWeight.Medium,
                             fontSize = 15.sp
