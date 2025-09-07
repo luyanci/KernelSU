@@ -7,6 +7,9 @@ kernelsu-objs += core_hook.o
 kernelsu-objs += ksud.o
 kernelsu-objs += embed_ksud.o
 kernelsu-objs += kernel_compat.o
+ifeq ($(strip $(CONFIG_KSU_TRACEPOINT_HOOK)),y)
+kernelsu-objs += ksu_trace.o
+endif
 
 kernelsu-objs += selinux/selinux.o
 kernelsu-objs += selinux/sepolicy.o
@@ -17,6 +20,7 @@ ccflags-y += -I$(objtree)/security/selinux -include $(srctree)/include/uapi/asm-
 ccflags-y += -include $(srctree)/$(src)/include/ksu_creds.h
 
 obj-$(CONFIG_KSU) += kernelsu.o
+obj-$(CONFIG_KSU_TRACEPOINT_HOOK) += ksu_trace_export.o
 
 # .git is a text file while the module is imported by 'git submodule add'.
 ifeq ($(shell test -e $(srctree)/$(src)/../.git; echo $$?),0)
@@ -34,9 +38,10 @@ endif
 # Checks hooks state
 ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
 $(info -- KernelSU: CONFIG_KSU_MANUAL_HOOK)
+else ifeq($(CONFIG_KSU_TRACEPOINT_HOOK), y)
+$(info -- KernelSU: CONFIG_KSU_TRACEPOINT_HOOK)
 else
 $(info -- KernelSU: CONFIG_KSU_KPROBES_HOOK)
-ccflags-y += -DCONFIG_KSU_KPROBES_HOOK
 endif
 
 # SELinux drivers check
