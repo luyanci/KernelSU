@@ -69,6 +69,7 @@ import me.weishu.kernelsu.getKernelVersion
 import me.weishu.kernelsu.ksuApp
 import me.weishu.kernelsu.ui.component.DropdownItem
 import me.weishu.kernelsu.ui.component.KsuIsValid
+import me.weishu.kernelsu.ui.component.KsuGetVersion
 import me.weishu.kernelsu.ui.component.rememberConfirmDialog
 import me.weishu.kernelsu.ui.util.checkNewVersion
 import me.weishu.kernelsu.ui.util.getModuleCount
@@ -149,8 +150,7 @@ fun HomePager(
         ) {
             item {
                 val coroutineScope = rememberCoroutineScope()
-                val isManager = Natives.becomeManager(ksuApp.packageName)
-                val ksuVersion = if (isManager) Natives.version else null
+                val ksuVersion: Int? = KsuGetVersion()
                 val lkmMode = ksuVersion?.let {
                     if (it >= Natives.MINIMAL_SUPPORTED_KERNEL_LKM && kernelVersion.isGKI()) Natives.isLkmMode else null
                 }
@@ -160,7 +160,7 @@ fun HomePager(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    if (isManager && Natives.requireNewKernel()) {
+                    if (ksuVersion != null && Natives.requireNewKernel()) {
                         WarningCard(
                             stringResource(id = R.string.require_kernel_version).format(
                                 ksuVersion, Natives.MINIMAL_SUPPORTED_KERNEL
@@ -382,6 +382,7 @@ private fun StatusCard(
                     true -> " <LKM>"
                     else -> " <GKI>"
                 }
+
 
                 val workingText = "${stringResource(id = R.string.home_working)}$workingMode$safeMode"
 
@@ -697,6 +698,10 @@ private fun InfoCard() {
         val context = LocalContext.current
         val uname = Os.uname()
         val managerVersion = getManagerVersion(context)
+        val hookMode = when (Natives.isKprobeMode) {
+            true -> "Kprobe"
+            else -> "Manual"
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -718,6 +723,11 @@ private fun InfoCard() {
                 title = stringResource(R.string.home_selinux_status),
                 content = getSELinuxStatus(),
                 bottomPadding = 0.dp
+            )
+            if (ksuVersion >= )
+            InfoText(
+                title = stringResource(R.string.home_hook_mode),
+                content = "$hookMode"
             )
         }
     }
