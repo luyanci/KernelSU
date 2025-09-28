@@ -17,7 +17,7 @@ jobs:
   build:
     runs-on: ${{ inputs.os }}
     env:
-      release_tag: '17234070854'
+      release_tag: '18066036316'
     steps:
     - uses: actions/checkout@v5
       with:
