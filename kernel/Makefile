@@ -37,7 +37,7 @@ endif
 # Checks hooks state
 ifeq ($(CONFIG_KSU_MANUAL_HOOK), y)
 $(info -- KernelSU: CONFIG_KSU_MANUAL_HOOK)
-else ifeq($(CONFIG_KSU_TRACEPOINT_HOOK), y)
+else ifeq ($(CONFIG_KSU_TRACEPOINT_HOOK), y)
 $(info -- KernelSU: CONFIG_KSU_TRACEPOINT_HOOK)
 else
 $(info -- KernelSU: CONFIG_KSU_KPROBES_HOOK)
