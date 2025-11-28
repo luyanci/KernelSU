@@ -141,8 +141,6 @@ fun InstallScreen(
                 tempKernelUri = preselectedUri
                 if (isAbDevice) {
                     showSlotSelectionDialog = true
-                } else {
-                    showKpmPatchDialog = true
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -194,8 +192,6 @@ fun InstallScreen(
                     summary = horizonKernelSummary
                 )
                 installMethod = horizonMethod
-                // 槽位选择后，显示 KPM 补丁选择对话框
-                showKpmPatchDialog = true
             }
         )
     }
@@ -286,7 +282,6 @@ fun InstallScreen(
                             if (method is InstallMethod.HorizonKernel && method.uri != null) {
                                 if (isAbDevice) {
                                     tempKernelUri = method.uri
-                                    showSlotSelectionDialog = true
                                 } else {
                                     installMethod = method
                                 }
