@@ -41,7 +41,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 @Stable
 data class AnyKernel3State(
     val showSlotSelectionDialog: Boolean,
-    val showKpmPatchDialog: Boolean,
     val onHorizonKernelSelected: (InstallMethod.HorizonKernel) -> Unit,
     val onSlotSelected: (String) -> Unit,
     val onDismissSlotDialog: () -> Unit,
@@ -65,9 +64,7 @@ fun rememberAnyKernel3State(
                 tempKernelUri = uri
                 showSlotSelectionDialog = true
             } else {
-                installMethodState.value = method
-                showKpmPatchDialog = true
-            }
+                installMethodState.value = method            }
         }
     }
     
@@ -100,9 +97,6 @@ fun rememberAnyKernel3State(
         showSlotSelectionDialog = false
     }
 
-    val onOptionSelected: (KpmPatchOption) -> Unit = { option ->
-        kpmPatchOption = option
-    }
 
     val onDismissPatchDialog = {
     }
@@ -121,7 +115,6 @@ fun rememberAnyKernel3State(
                         showSlotSelectionDialog = true
                     } else {
                         installMethodState.value = method
-                        showKpmPatchDialog = true
                     }
                 }
         }
@@ -132,8 +125,6 @@ fun rememberAnyKernel3State(
         onHorizonKernelSelected = onHorizonKernelSelected,
         onSlotSelected = onSlotSelected,
         onDismissSlotDialog = onDismissSlotDialog,
-        onOptionSelected = onOptionSelected,
-        onDismissPatchDialog = onDismissPatchDialog,
         onReopenSlotDialog = onReopenSlotDialog,
     )
 }
