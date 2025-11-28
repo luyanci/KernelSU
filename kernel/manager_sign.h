@@ -10,7 +10,7 @@
 
 // luyanci/KernelSU
 #define EXPECTED_SIZE_LUYANCI   0x37d
-#define EXPECTED_HASH_LUYANCI
+#define EXPECTED_HASH_LUYANCI												   \
 	"50234c79d22d0d2a1dba0ad90d1acffbb2acdc5e80cfcb965b01572f1e538112"
 
 // 5ec1cff/KernelSU
