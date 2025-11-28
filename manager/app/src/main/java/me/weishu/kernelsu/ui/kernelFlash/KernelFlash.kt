@@ -237,7 +237,7 @@ fun KernelFlashScreen(
                 .padding(it)
                 .scrollEndHaptic(),
         ) {
-            FlashProgressIndicator(flashState, kpmPatchEnabled, kpmUndoPatch)
+            FlashProgressIndicator(flashState)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

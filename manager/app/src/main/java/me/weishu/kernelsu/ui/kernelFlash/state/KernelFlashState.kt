@@ -7,7 +7,6 @@ import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.kernelFlash.util.AssetsUtil
-import me.weishu.kernelsu.ui.kernelFlash.util.RemoteToolsDownloader
 import me.weishu.kernelsu.ui.util.install
 import me.weishu.kernelsu.ui.util.rootAvailable
 import com.topjohnwu.superuser.Shell
@@ -82,6 +81,7 @@ class HorizonKernelState {
 
 class HorizonKernelWorker(
     private val context: Context,
+    private val uri: Uri,
     private val state: HorizonKernelState,
     private val slot: String? = null
 ) : Thread() {
