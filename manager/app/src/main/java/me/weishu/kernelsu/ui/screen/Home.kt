@@ -543,7 +543,7 @@ fun WarningCard(
 fun UnofficialCard() {
     val uriHandler = LocalUriHandler.current
     val url = "https://github.com/luyanci/KernelSU"
-
+    Card(
         modifier = Modifier
             .fillMaxWidth(),
     ) {
