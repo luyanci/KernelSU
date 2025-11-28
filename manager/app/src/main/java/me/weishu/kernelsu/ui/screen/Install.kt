@@ -63,6 +63,7 @@ import me.weishu.kernelsu.getKernelVersion
 import me.weishu.kernelsu.ui.component.ChooseKmiDialog
 import me.weishu.kernelsu.ui.component.rememberConfirmDialog
 import me.weishu.kernelsu.ui.kernelFlash.component.SlotSelectionDialog
+import me.weishu.kernelsu.ui.kernelFlash.InstallMethod
 import me.weishu.kernelsu.ui.util.LkmSelection
 import me.weishu.kernelsu.ui.util.getAvailablePartitions
 import me.weishu.kernelsu.ui.util.getCurrentKmi
@@ -417,34 +418,6 @@ fun InstallScreen(
             }
         }
     }
-}
-
-sealed class InstallMethod {
-    data class SelectFile(
-        val uri: Uri? = null,
-        @get:StringRes override val label: Int = R.string.select_file,
-        override val summary: String?
-    ) : InstallMethod()
-
-    data object DirectInstall : InstallMethod() {
-        override val label: Int
-            get() = R.string.direct_install
-    }
-
-    data object DirectInstallToInactiveSlot : InstallMethod() {
-        override val label: Int
-            get() = R.string.install_inactive_slot
-    }
-
-    data class HorizonKernel(
-        val uri: Uri? = null,
-        val slot: String? = null,
-        @get:StringRes override val label: Int = R.string.horizon_kernel,
-        override val summary: String? = null
-    ) : InstallMethod()
-
-    abstract val label: Int
-    open val summary: String? = null
 }
 
 @Composable

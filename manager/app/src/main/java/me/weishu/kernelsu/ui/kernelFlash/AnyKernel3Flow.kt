@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import me.weishu.kernelsu.R
-import me.weishu.kernelsu.ui.screen.InstallMethod
+import me.weishu.kernelsu.ui.kernelFlash.InstallMethod
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
