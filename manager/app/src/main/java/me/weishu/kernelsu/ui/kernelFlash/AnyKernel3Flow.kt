@@ -45,8 +45,6 @@ data class AnyKernel3State(
     val onHorizonKernelSelected: (InstallMethod.HorizonKernel) -> Unit,
     val onSlotSelected: (String) -> Unit,
     val onDismissSlotDialog: () -> Unit,
-    val onOptionSelected: (KpmPatchOption) -> Unit,
-    val onDismissPatchDialog: () -> Unit,
     val onReopenSlotDialog: (InstallMethod.HorizonKernel) -> Unit,
 )
 
@@ -58,7 +56,6 @@ fun rememberAnyKernel3State(
     isAbDevice: Boolean
 ): AnyKernel3State {
     var showSlotSelectionDialog by remember { mutableStateOf(false) }
-    var showKpmPatchDialog by remember { mutableStateOf(false) }
     var tempKernelUri by remember { mutableStateOf<Uri?>(null) }
 
     val onHorizonKernelSelected: (InstallMethod.HorizonKernel) -> Unit = { method ->

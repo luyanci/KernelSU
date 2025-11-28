@@ -96,7 +96,10 @@ import top.yukonga.miuix.kmp.utils.scrollEndHaptic
  */
 @Composable
 @Destination<RootGraph>
-fun InstallScreen(navigator: DestinationsNavigator) {
+fun InstallScreen(
+    navigator: DestinationsNavigator,
+    preselectedKernelUri: String? = null
+) {
     val context = LocalContext.current
     var installMethod by remember {
         mutableStateOf<InstallMethod?>(null)
@@ -105,25 +108,88 @@ fun InstallScreen(navigator: DestinationsNavigator) {
     var lkmSelection by remember {
         mutableStateOf<LkmSelection>(LkmSelection.KmiNone)
     }
+    var showSlotSelectionDialog by remember { mutableStateOf(false) }
+    var tempKernelUri by remember { mutableStateOf<Uri?>(null) }
+    val kernelVersion = getKernelVersion()
+    val isGKI = kernelVersion.isGKI()
+    val isAbDevice = produceState(initialValue = false) {
+        value = isAbDevice()
+    }.value
 
     var partitionSelectionIndex by remember { mutableIntStateOf(0) }
     var partitionsState by remember { mutableStateOf<List<String>>(emptyList()) }
     var hasCustomSelected by remember { mutableStateOf(false) }
+    val horizonKernelSummary = stringResource(R.string.horizon_kernel_summary)
+    // 处理预选的内核文件
+    LaunchedEffect(preselectedKernelUri) {
+        preselectedKernelUri?.let { uriString ->
+            try {
+                val preselectedUri = uriString.toUri()
+                val horizonMethod = InstallMethod.HorizonKernel(
+                    uri = preselectedUri,
+                    summary = horizonKernelSummary
+                )
+                installMethod = horizonMethod
+                tempKernelUri = preselectedUri
+                if (isAbDevice) {
+                    showSlotSelectionDialog = true
+                } else {
+                    showKpmPatchDialog = true
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
     val onInstall = {
         installMethod?.let { method ->
-            val isOta = method is InstallMethod.DirectInstallToInactiveSlot
-            val partitionSelection = partitionsState.getOrNull(partitionSelectionIndex)
-            val flashIt = FlashIt.FlashBoot(
-                boot = if (method is InstallMethod.SelectFile) method.uri else null,
-                lkm = lkmSelection,
-                ota = isOta,
-                partition = partitionSelection
-            )
-            navigator.navigate(FlashScreenDestination(flashIt)) {
-                launchSingleTop = true
+            when (method) {
+                is InstallMethod.HorizonKernel -> {
+                    method.uri?.let { uri ->
+                        navigator.navigate(
+                            KernelFlashScreenDestination(
+                                kernelUri = uri,
+                                selectedSlot = method.slot,
+                            )
+                        ) {
+                            launchSingleTop = true
+                        }
+                    }
+                }
+                else -> {
+                    val isOta = method is InstallMethod.DirectInstallToInactiveSlot
+                    val partitionSelection = partitionsState.getOrNull(partitionSelectionIndex)
+                    val flashIt = FlashIt.FlashBoot(
+                        boot = if (method is InstallMethod.SelectFile) method.uri else null,
+                        lkm = lkmSelection,
+                        ota = isOta,
+                        partition = partitionSelection
+                    )
+                    navigator.navigate(FlashScreenDestination(flashIt)) {
+                        launchSingleTop = true
+                    }
+                }
             }
-        }
+    }
+
+        // 槽位选择对话框
+    if (showSlotSelectionDialog && isAbDevice) {
+        SlotSelectionDialog(
+            show = true,
+            onDismiss = { showSlotSelectionDialog = false },
+            onSlotSelected = { slot ->
+                showSlotSelectionDialog = false
+                val horizonMethod = InstallMethod.HorizonKernel(
+                    uri = tempKernelUri,
+                    slot = slot,
+                    summary = horizonKernelSummary
+                )
+                installMethod = horizonMethod
+                // 槽位选择后，显示 KPM 补丁选择对话框
+                showKpmPatchDialog = true
+            }
+        )
     }
 
     val currentKmi by produceState(initialValue = "") { value = getCurrentKmi() }
@@ -137,7 +203,7 @@ fun InstallScreen(navigator: DestinationsNavigator) {
     }
 
     val onClickNext = {
-        if (lkmSelection == LkmSelection.KmiNone && currentKmi.isBlank()) {
+        if (isGKI && lkmSelection == LkmSelection.KmiNone && currentKmi.isBlank() && installMethod !is InstallMethod.HorizonKernel) {
             // no lkm file selected and cannot get current kmi
             showChooseKmiDialog.value = true
             chooseKmiDialog
@@ -208,7 +274,20 @@ fun InstallScreen(navigator: DestinationsNavigator) {
                         .fillMaxWidth(),
                 ) {
                     SelectInstallMethod { method ->
-                        installMethod = method
+                        onSelected = {method ->
+                            if (method is InstallMethod.HorizonKernel && method.uri != null) {
+                                if (isAbDevice) {
+                                    tempKernelUri = method.uri
+                                    showSlotSelectionDialog = true
+                                } else {
+                                    installMethod = method
+                                }
+                            } else {
+                                installMethod = method
+                            }
+                        },
+                        isAbDevice = isAbDevice
+                    )
                     }
                 }
                 AnimatedVisibility(
@@ -256,30 +335,62 @@ fun InstallScreen(navigator: DestinationsNavigator) {
                         )
                     }
                 }
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp),
-                ) {
-                    SuperArrow(
-                        title = stringResource(id = R.string.install_upload_lkm_file),
-                        summary = (lkmSelection as? LkmSelection.LkmUri)?.let {
-                            stringResource(
-                                id = R.string.selected_lkm,
-                                it.uri.lastPathSegment ?: "(file)"
-                            )
-                        },
-                        onClick = onLkmUpload,
-                        leftAction = {
-                            Icon(
-                                MiuixIcons.Useful.Move,
-                                tint = colorScheme.onSurface,
-                                modifier = Modifier.padding(end = 16.dp),
-                                contentDescription = null
-                            )
-                        }
-                    )
+
+                // LKM 上传选项（仅 GKI）
+                if (isGKI) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp),
+                    ) {
+                        SuperArrow(
+                            title = stringResource(id = R.string.install_upload_lkm_file),
+                            summary = (lkmSelection as? LkmSelection.LkmUri)?.let {
+                                stringResource(
+                                    id = R.string.selected_lkm,
+                                    it.uri.lastPathSegment ?: "(file)"
+                                )
+                            },
+                            onClick = onLkmUpload,
+                            leftAction = {
+                                Icon(
+                                    MiuixIcons.Useful.Move,
+                                    tint = colorScheme.onSurface,
+                                    modifier = Modifier.padding(end = 16.dp),
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                    }
                 }
+
+                // AnyKernel3 相关信息显示
+                (installMethod as? InstallMethod.HorizonKernel)?.let { method ->
+                    if (method.slot != null) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 12.dp),
+                        ) {
+                            SuperArrow(
+                                title = stringResource(
+                                    id = R.string.selected_slot,
+                                    if (method.slot == "a") stringResource(id = R.string.slot_a)
+                                    else stringResource(id = R.string.slot_b)
+                                ),
+                                onClick = {},
+                                leftAction = {
+                                    Icon(
+                                        Icons.Filled.SdStorage,
+                                        tint = colorScheme.onSurface,
+                                        modifier = Modifier.padding(end = 16.dp),
+                                        contentDescription = null
+                                    )
+                                }
+                            )
+                       }
+                    }
+
                 Button(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -322,19 +433,27 @@ sealed class InstallMethod {
             get() = R.string.install_inactive_slot
     }
 
+    data class HorizonKernel(
+        val uri: Uri? = null,
+        val slot: String? = null,
+        @get:StringRes override val label: Int = R.string.horizon_kernel,
+        override val summary: String? = null
+    ) : InstallMethod()
+
     abstract val label: Int
     open val summary: String? = null
 }
 
 @Composable
-private fun SelectInstallMethod(onSelected: (InstallMethod) -> Unit = {}) {
+private fun SelectInstallMethod(
+    onSelected: (InstallMethod) -> Unit = {},
+    isAbDevice: Boolean = false
+) {
     val rootAvailable = rootAvailable()
-    val isAbDevice = produceState(initialValue = false) {
-        value = isAbDevice()
-    }.value
     val defaultPartitionName = produceState(initialValue = "boot") {
         value = getDefaultPartition()
     }.value
+    val horizonKernelSummary = stringResource(R.string.horizon_kernel_summary)
     val selectFileTip = stringResource(
         id = R.string.select_file_tip, defaultPartitionName
     )
@@ -348,15 +467,22 @@ private fun SelectInstallMethod(onSelected: (InstallMethod) -> Unit = {}) {
     }
 
     var selectedOption by remember { mutableStateOf<InstallMethod?>(null) }
+    var currentSelectingMethod by remember { mutableStateOf<InstallMethod?>(null) }
+
     val selectImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) {
         if (it.resultCode == Activity.RESULT_OK) {
             it.data?.data?.let { uri ->
-                val option = InstallMethod.SelectFile(uri, summary = selectFileTip)
-                selectedOption = option
-                onSelected(option)
-            }
+                val option = when (currentSelectingMethod) {
+                    is InstallMethod.SelectFile -> InstallMethod.SelectFile(uri, summary = selectFileTip)
+                    is InstallMethod.HorizonKernel -> InstallMethod.HorizonKernel(uri, summary = horizonKernelSummary)
+                    else -> null
+                }
+                option?.let { opt ->
+                    selectedOption = opt
+                    onSelected(opt)
+                }
         }
     }
 
@@ -370,11 +496,13 @@ private fun SelectInstallMethod(onSelected: (InstallMethod) -> Unit = {}) {
     val dialogContent = stringResource(id = R.string.install_inactive_slot_warning)
 
     val onClick = { option: InstallMethod ->
+        currentSelectingMethod = option
 
         when (option) {
-            is InstallMethod.SelectFile -> {
+            is InstallMethod.SelectFile, is InstallMethod.HorizonKernel -> {
                 selectImageLauncher.launch(Intent(Intent.ACTION_GET_CONTENT).apply {
-                    type = "application/octet-stream"
+                    type = "application/*"
+                    putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/octet-stream", "application/zip"))
                 })
             }
 
