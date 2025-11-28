@@ -19,6 +19,7 @@ cmaker = "1.2"
 miuix = "0.7.1"
 haze = "1.7.1"
 capsule = "2.1.1"
+documentfile = "1.1.0"
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }
@@ -70,5 +71,7 @@ miuix = { module = "top.yukonga.miuix.kmp:miuix-android", version.ref = "miuix" 
 haze = { module = "dev.chrisbanes.haze:haze-android", version.ref = "haze" }
 
 capsule = { module = "io.github.kyant0:capsule", version.ref = "capsule" }
+
+androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
 
 twain = { module = "com.colintheshots:twain", version.ref = "twain" }
