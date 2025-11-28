@@ -51,9 +51,9 @@ jobs:
         id: GET_THREAD_ID
         run: |
           if [ "${{ inputs.manager_type }}" == "spoofed" ]; then
-            echo "MSG_THREAD_ID=${{ secrets.MESSAGE_THREAD_ID }}" >> $GITHUB_OUTPUT
-          else
             echo "MSG_THREAD_ID=857" >> $GITHUB_OUTPUT
+          else
+            echo "MSG_THREAD_ID=${{ secrets.MESSAGE_THREAD_ID }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Write key
