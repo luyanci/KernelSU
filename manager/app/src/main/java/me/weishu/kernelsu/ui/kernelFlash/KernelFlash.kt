@@ -1,10 +1,10 @@
 package me.weishu.kernelsu.ui.kernelFlash
 
-import android.content.Intent
+import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.edit
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -47,7 +48,6 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.useful.Back
 import top.yukonga.miuix.kmp.icon.icons.useful.Save
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import java.io.File
@@ -63,15 +63,11 @@ private object KernelFlashStateHolder {
     var currentUri: Uri? = null
     var currentSlot: String? = null
     var isFlashing = false
-    
-    fun clear() {
-        currentState = null
-        currentUri = null
-        currentSlot = null
-        isFlashing = false
-    }
 }
 
+/**
+ * Kernel刷写界面
+ */
 @Destination<RootGraph>
 @Composable
 fun KernelFlashScreen(
@@ -80,6 +76,12 @@ fun KernelFlashScreen(
     selectedSlot: String? = null,
 ) {
     val context = LocalContext.current
+
+    val shouldAutoExit = remember {
+        val sharedPref = context.getSharedPreferences("kernel_flash_prefs", Context.MODE_PRIVATE)
+        sharedPref.getBoolean("auto_exit_after_flash", false)
+    }
+
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
     var logText by rememberSaveable { mutableStateOf("") }
@@ -101,27 +103,18 @@ fun KernelFlashScreen(
     }
 
     val flashState by horizonKernelState.state.collectAsState()
-    val activity = LocalActivity.current
 
     val onFlashComplete = {
         showFloatAction = true
         KernelFlashStateHolder.isFlashing = false
-    }
-    
-    // 如果是从外部打开的内核刷写，延迟1.5秒后自动退出
-    LaunchedEffect(flashState.isCompleted, flashState.error) {
-        if (flashState.isCompleted && flashState.error.isEmpty()) {
-            val intent = activity?.intent
-            val isFromExternalIntent = intent?.action?.let { action ->
-                action == Intent.ACTION_VIEW ||
-                action == Intent.ACTION_SEND ||
-                action == Intent.ACTION_SEND_MULTIPLE
-            } ?: false
 
-            if (isFromExternalIntent) {
+        // 如果需要自动退出，延迟1.5秒后退出
+        if (shouldAutoExit) {
+            scope.launch {
                 delay(1500)
-                KernelFlashStateHolder.clear()
-                activity.finish()
+                val sharedPref = context.getSharedPreferences("kernel_flash_prefs", Context.MODE_PRIVATE)
+                sharedPref.edit { remove("auto_exit_after_flash") }
+                (context as? ComponentActivity)?.finish()
             }
         }
     }
@@ -169,18 +162,24 @@ fun KernelFlashScreen(
 
     val onBack: () -> Unit = {
         if (!flashState.isFlashing || flashState.isCompleted || flashState.error.isNotEmpty()) {
+            // 清理全局状态
             if (flashState.isCompleted || flashState.error.isNotEmpty()) {
-                KernelFlashStateHolder.clear()
+                KernelFlashStateHolder.currentState = null
+                KernelFlashStateHolder.currentUri = null
+                KernelFlashStateHolder.currentSlot = null
+                KernelFlashStateHolder.isFlashing = false
             }
             navigator.popBackStack()
         }
     }
 
-    // 清理状态
-    DisposableEffect(Unit) {
+    DisposableEffect(shouldAutoExit) {
         onDispose {
-            if (flashState.isCompleted || flashState.error.isNotEmpty()) {
-                KernelFlashStateHolder.clear()
+            if (shouldAutoExit) {
+                KernelFlashStateHolder.currentState = null
+                KernelFlashStateHolder.currentUri = null
+                KernelFlashStateHolder.currentSlot = null
+                KernelFlashStateHolder.isFlashing = false
             }
         }
     }
@@ -261,16 +260,16 @@ fun KernelFlashScreen(
 
 @Composable
 private fun FlashProgressIndicator(
-    flashState: FlashState
+    flashState: FlashState,
 ) {
-    val statusColor = when {
-        flashState.error.isNotEmpty() -> colorScheme.error
-        flashState.isCompleted -> colorScheme.primary
+    val progressColor = when {
+        flashState.error.isNotEmpty() -> colorScheme.primary
+        flashState.isCompleted -> colorScheme.secondary
         else -> colorScheme.primary
     }
 
     val progress = animateFloatAsState(
-        targetValue = flashState.progress.coerceIn(0f, 1f),
+        targetValue = flashState.progress,
         label = "FlashProgress"
     )
 
@@ -295,9 +294,8 @@ private fun FlashProgressIndicator(
                         flashState.isCompleted -> stringResource(R.string.flash_success)
                         else -> stringResource(R.string.flashing)
                     },
-                    fontSize = MiuixTheme.textStyles.title4.fontSize,
-                    fontWeight = FontWeight.Medium,
-                    color = statusColor
+                    fontWeight = FontWeight.Bold,
+                    color = progressColor
                 )
 
                 when {
@@ -305,48 +303,60 @@ private fun FlashProgressIndicator(
                         Icon(
                             imageVector = Icons.Default.Error,
                             contentDescription = null,
-                            tint = colorScheme.error
+                            tint = colorScheme.primary
                         )
                     }
                     flashState.isCompleted -> {
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
                             contentDescription = null,
-                            tint = colorScheme.primary
+                            tint = colorScheme.secondary
                         )
                     }
                 }
             }
 
             if (flashState.currentStep.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = flashState.currentStep,
-                    fontSize = MiuixTheme.textStyles.body2.fontSize,
                     color = colorScheme.onSurfaceVariantSummary
                 )
-            }
 
-            Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             LinearProgressIndicator(
                 progress = progress.value,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
             )
 
             if (flashState.error.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Error,
+                        contentDescription = null,
+                        tint = colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
                 Text(
                     text = flashState.error,
-                    fontSize = MiuixTheme.textStyles.body2.fontSize,
-                    color = colorScheme.onErrorContainer,
+                    color = colorScheme.primary,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(12.dp)
                         .background(
-                            colorScheme.errorContainer
+                            colorScheme.primaryContainer.copy(alpha = 0.3f)
                         )
-                        .padding(12.dp)
+                        .padding(8.dp)
                 )
             }
         }

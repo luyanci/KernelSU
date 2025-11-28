@@ -8,10 +8,9 @@ import androidx.documentfile.provider.DocumentFile
 import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.kernelFlash.util.AssetsUtil
 import me.weishu.kernelsu.ui.kernelFlash.util.RemoteToolsDownloader
-import me.weishu.kernelsu.ui.util.getRootShell
 import me.weishu.kernelsu.ui.util.install
 import me.weishu.kernelsu.ui.util.rootAvailable
-import com.topjohnwu.superuser.ShellUtils
+import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -75,6 +74,10 @@ class HorizonKernelState {
     fun completeFlashing() {
         _state.update { it.copy(isCompleted = true, progress = 1f) }
     }
+
+    fun reset() {
+        _state.value = FlashState()
+    }
 }
 
 class HorizonKernelWorker(
@@ -137,12 +140,7 @@ class HorizonKernelWorker(
             if (isAbDevice && slot != null) {
                 state.updateStep(context.getString(R.string.horizon_getting_original_slot))
                 state.updateProgress(0.72f)
-                originalSlot = try {
-                    val shell = getRootShell()
-                    ShellUtils.fastCmd(shell, "getprop ro.boot.slot_suffix").trim()
-                } catch (_: Exception) {
-                    null
-                }
+                originalSlot = runCommandGetOutput("getprop ro.boot.slot_suffix")
 
                 state.updateStep(context.getString(R.string.horizon_setting_target_slot))
                 state.updateProgress(0.74f)
@@ -214,16 +212,11 @@ class HorizonKernelWorker(
 
     // 检查设备是否为AB分区设备
     private fun isAbDevice(): Boolean {
-        return try {
-            val shell = getRootShell()
-            val abUpdate = ShellUtils.fastCmd(shell, "getprop ro.build.ab_update").trim()
-            if (!abUpdate.toBoolean()) return false
+        val abUpdate = runCommandGetOutput("getprop ro.build.ab_update")
+        if (!abUpdate.toBoolean()) return false
 
-            val slotSuffix = ShellUtils.fastCmd(shell, "getprop ro.boot.slot_suffix").trim()
-            slotSuffix.isNotEmpty()
-        } catch (_: Exception) {
-            false
-        }
+        val slotSuffix = runCommandGetOutput("getprop ro.boot.slot_suffix")
+        return slotSuffix.isNotEmpty()
     }
 
     private fun cleanup() {
@@ -250,12 +243,7 @@ class HorizonKernelWorker(
 
     @SuppressLint("StringFormatInvalid")
     private fun patch() {
-        val kernelVersion = try {
-            val shell = getRootShell()
-            ShellUtils.fastCmd(shell, "cat /proc/version")
-        } catch (_: Exception) {
-            ""
-        }
+        val kernelVersion = runCommandGetOutput("cat /proc/version")
         val versionRegex = """\d+\.\d+\.\d+""".toRegex()
         val version = kernelVersion.let { versionRegex.find(it) }?.value ?: ""
         val toolName = if (version.isNotEmpty()) {
@@ -273,9 +261,7 @@ class HorizonKernelWorker(
         val toolPath = "${context.filesDir.absolutePath}/mkbootfs"
         AssetsUtil.exportFiles(context, "$toolName-mkbootfs", toolPath)
         state.addLog("${context.getString(R.string.kernel_version_log, version)} ${context.getString(R.string.tool_version_log, toolName)}")
-        runCommand(false,
-            $$"sed -i '/chmod -R 755 tools bin;/i cp -f $$toolPath $AKHOME/tools;' $$binaryPath"
-        )
+        runCommand(false, "sed -i '/chmod -R 755 tools bin;/i cp -f $toolPath \$AKHOME/tools;' $binaryPath")
     }
 
     private fun flash() {
@@ -344,5 +330,9 @@ class HorizonKernelWorker(
         } finally {
             process.destroy()
         }
+    }
+
+    private fun runCommandGetOutput(cmd: String): String {
+        return Shell.cmd(cmd).exec().out.joinToString("\n").trim()
     }
 }
