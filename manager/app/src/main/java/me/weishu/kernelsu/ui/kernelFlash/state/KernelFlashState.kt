@@ -9,6 +9,7 @@ import me.weishu.kernelsu.R
 import me.weishu.kernelsu.ui.kernelFlash.util.AssetsUtil
 import me.weishu.kernelsu.ui.util.install
 import me.weishu.kernelsu.ui.util.rootAvailable
+import me.weishu.kernelsu.ui.kernelFlash.component.SlotSelectionDialog
 import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -85,7 +86,6 @@ class HorizonKernelWorker(
     private val state: HorizonKernelState,
     private val slot: String? = null
 ) : Thread() {
-    var uri: Uri? = null
     private lateinit var filePath: String
     private lateinit var binaryPath: String
     private lateinit var workDir: String
@@ -101,7 +101,8 @@ class HorizonKernelWorker(
         state.startFlashing()
         state.updateStep(context.getString(R.string.horizon_preparing))
 
-        filePath = "${context.filesDir.absolutePath}/${DocumentFile.fromSingleUri(context, uri!!)?.name}"
+        val kernelfileName = DocumentFile.fromSingleUri(context,uri)?.name
+        filePath = "${context.filesDir.absolutePath}/$kernelfileName"
         binaryPath = "${context.filesDir.absolutePath}/META-INF/com/google/android/update-binary"
         workDir = "${context.filesDir.absolutePath}/work"
 
@@ -153,12 +154,6 @@ class HorizonKernelWorker(
                 state.updateStep(context.getString(R.string.horizon_restoring_original_slot))
                 state.updateProgress(0.8f)
                 runCommand(true, "resetprop ro.boot.slot_suffix $originalSlot")
-            }
-
-            try {
-                install()
-            } catch (e: Exception) {
-                state.updateStep("ksud update skipped: ${e.message}")
             }
 
             state.updateStep(context.getString(R.string.horizon_flash_complete_status))
@@ -225,14 +220,11 @@ class HorizonKernelWorker(
     }
 
     private fun copy() {
-        uri?.let { safeUri ->
-            context.contentResolver.openInputStream(safeUri)?.use { input ->
-                FileOutputStream(File(filePath)).use { output ->
+        context.contentResolver.openInputStream(safeUri)?.use<java.io.InputStream,Unit> { input ->
+                FileOutputStream(File(filePath)).use<java.io.OutputStream> { output ->
                     input.copyTo(output)
                 }
-            }
-        }
-    }
+        }?: throw IOException("Failed to open kernel file stream")
 
     private fun getBinary() {
         runCommand(false, "unzip \"$filePath\" \"*/update-binary\" -d ${context.filesDir.absolutePath}")

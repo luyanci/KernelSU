@@ -237,7 +237,7 @@ fun KernelFlashScreen(
                 .padding(it)
                 .scrollEndHaptic(),
         ) {
-            FlashProgressIndicator(flashState)
+            FlashProgressIndicator(flashState=flashState)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -260,7 +260,7 @@ fun KernelFlashScreen(
 
 @Composable
 private fun FlashProgressIndicator(
-    flashState: FlashState,
+    flashState: FlashState
 ) {
     val progressColor = when {
         flashState.error.isNotEmpty() -> colorScheme.primary
