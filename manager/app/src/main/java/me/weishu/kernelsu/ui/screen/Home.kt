@@ -316,7 +316,7 @@ private fun StatusCard(
                 val workingMode = when (lkmMode) {
                     null -> ""
                     true -> " <LKM>"
-                    else -> " <GKI>"
+                    else -> " <Built-in>"
                 }
 
                 val workingText = "${stringResource(id = R.string.home_working)}$workingMode$safeMode"
