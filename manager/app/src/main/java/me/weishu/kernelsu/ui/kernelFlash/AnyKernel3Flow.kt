@@ -75,10 +75,6 @@ fun rememberAnyKernel3State(
             showSlotSelectionDialog = true
         }
     }
-    
-    val onReopenKpmDialog: (InstallMethod.HorizonKernel) -> Unit = { method ->
-        installMethodState.value = method
-    }
 
     val onSlotSelected: (String) -> Unit = { slot ->
         val uri = tempKernelUri ?: (installMethodState.value as? InstallMethod.HorizonKernel)?.uri
