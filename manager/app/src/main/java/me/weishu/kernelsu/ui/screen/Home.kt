@@ -542,9 +542,8 @@ fun WarningCard(
 @Composable
 fun UnofficialCard() {
     val uriHandler = LocalUriHandler.current
-    val url = "https://github.com/rsuntk/KernelSU"
+    val url = "https://github.com/luyanci/KernelSU"
 
-    Card(
         modifier = Modifier
             .fillMaxWidth(),
     ) {
