@@ -47,6 +47,15 @@ jobs:
             echo "MPS_ARTIFACT_NAME=mappings" >> $GITHUB_OUTPUT
           fi
 
+      - name: Get message thread id
+        id: GET_THREAD_ID
+        run: |
+          if [ "${{ inputs.manager_type }}" == "spoofed" ]; then
+            echo "MSG_THREAD_ID=${{ secrets.MESSAGE_THREAD_ID }}" >> $GITHUB_OUTPUT
+          else
+            echo "MSG_THREAD_ID=857" >> $GITHUB_OUTPUT
+          fi
+
       - name: Write key
         if: ${{ ( github.event_name != 'pull_request' && github.ref == 'refs/heads/main' ) || github.ref_type == 'tag' }}
         run: |
@@ -120,7 +129,7 @@ jobs:
         env:
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          MESSAGE_THREAD_ID: ${{ secrets.MESSAGE_THREAD_ID }}
+          MESSAGE_THREAD_ID: ${{ steps.GET_THREAD_ID.outputs.MSG_THREAD_ID }}
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
           COMMIT_URL: ${{ github.event.head_commit.url }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
