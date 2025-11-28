@@ -10,7 +10,6 @@ import me.weishu.kernelsu.ui.kernelFlash.util.AssetsUtil
 import me.weishu.kernelsu.ui.util.install
 import me.weishu.kernelsu.ui.util.rootAvailable
 import com.topjohnwu.superuser.Shell
-import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +19,6 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
-
 
 /**
  * @author ShirkNeko
@@ -85,7 +83,7 @@ class HorizonKernelWorker(
     private val state: HorizonKernelState,
     private val slot: String? = null
 ) : Thread() {
-    var uri: Uri? = null
+
     private lateinit var filePath: String
     private lateinit var binaryPath: String
     private lateinit var workDir: String
@@ -101,7 +99,8 @@ class HorizonKernelWorker(
         state.startFlashing()
         state.updateStep(context.getString(R.string.horizon_preparing))
 
-        filePath = "${context.filesDir.absolutePath}/${DocumentFile.fromSingleUri(context, uri!!)?.name}"
+        val docFile = DocumentFile.fromSingleUri(context, uri)
+        filePath = "${context.filesDir.absolutePath}/${docFile?.name ?: "kernel.zip"}"
         binaryPath = "${context.filesDir.absolutePath}/META-INF/com/google/android/update-binary"
         workDir = "${context.filesDir.absolutePath}/work"
 
@@ -177,8 +176,6 @@ class HorizonKernelWorker(
             }
         }
     }
-    }
-
 
     private fun repackZipFolder(sourceDir: String, zipFilePath: String) {
         try {
@@ -225,11 +222,9 @@ class HorizonKernelWorker(
     }
 
     private fun copy() {
-        uri?.let { safeUri ->
-            context.contentResolver.openInputStream(safeUri)?.use { input ->
-                FileOutputStream(File(filePath)).use { output ->
-                    input.copyTo(output)
-                }
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            FileOutputStream(File(filePath)).use { output ->
+                input.copyTo(output)
             }
         }
     }
