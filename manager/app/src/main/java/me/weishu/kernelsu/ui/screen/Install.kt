@@ -464,6 +464,7 @@ private fun SelectInstallMethod(
         if (isAbDevice) {
             radioOptions.add(InstallMethod.DirectInstallToInactiveSlot)
         }
+        radioOptions.add(InstallMethod.HorizonKernel(summary = horizonKernelSummary))
     }
 
     var selectedOption by remember { mutableStateOf<InstallMethod?>(null) }
